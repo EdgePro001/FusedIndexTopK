@@ -3,9 +3,9 @@ requires = ["setuptools>=77"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "index-topk-perflab"
+name = "fused-index-topk"
 version = "0.1.0"
-description = "Controlled H20 performance lab for DSA Indexer, exact TopK, and fused variants"
+description = "DeepGEMM-style fused Indexer and exact Top-K kernels for DeepSeek V3.2 sparse attention"
 readme = "README.md"
 license = "MIT"
 license-files = ["LICENSE", "NOTICE"]
@@ -21,6 +21,7 @@ classifiers = [
 ]
 
 [project.scripts]
+fused-index-topk = "index_topk_perflab.cli:main"
 itk-perflab = "index_topk_perflab.cli:main"
 
 [project.optional-dependencies]

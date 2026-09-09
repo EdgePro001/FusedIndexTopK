@@ -1,10 +1,12 @@
-# IndexTopK-PerfLab
+# FusedIndexTopK
 
-An auditable research artifact for **fused DeepGEMM indexer + exact Top-K** on
-NVIDIA Hopper GPUs. This public snapshot contains the final R13a/R16a kernels,
-the exactness and timing harness, and compact machine-readable evidence. It
-intentionally excludes abandoned kernel variants, raw profiler dumps, private
-machine paths, model weights, and replay tensors.
+High-performance fused Indexer and exact Top-K kernels for the **DeepSeek V3.2
+sparse-attention architecture**, built with **DeepGEMM-style CUDA design**,
+device-side exact repair, and reproducible GPU benchmarks. This public artifact
+contains the final R13a/R16a kernels, the exactness and timing harness, and
+compact machine-readable evidence. It intentionally excludes abandoned kernel
+variants, raw profiler dumps, private machine paths, model weights, and replay
+tensors.
 
 ## Result at a glance
 
@@ -87,6 +89,9 @@ public candidates.
 
 CPU-only framework checks support Python 3.10–3.12 and do not import CUDA at
 module import time.
+
+The Python import namespace remains `index_topk_perflab` so published configs
+and machine-readable artifacts retain their original identities.
 
 ## Quick start
 
