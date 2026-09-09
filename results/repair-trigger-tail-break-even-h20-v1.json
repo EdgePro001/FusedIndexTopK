@@ -1,0 +1,150 @@
+{
+  "schema_version": 1,
+  "status": "diagnostic_complete",
+  "title": "Exact repair trigger, tail, and break-even diagnostic on H20",
+  "scope": {
+    "gpu": "NVIDIA H20-3e",
+    "query_tokens": 4096,
+    "top_k": 2048,
+    "indexer_heads": 64,
+    "head_dim": 128,
+    "data": "held-out DeepSeek-V3.2 replay test_hard A/B",
+    "r13a_context_and_layer": "N=16384, layer 30",
+    "r16a_contexts_and_layer": "N=32768/65536/131072, layer 0"
+  },
+  "protocol": {
+    "warmup_iterations": 10,
+    "cuda_event_trials_per_configuration": 100,
+    "kineto_cupti_trials_per_configuration": 50,
+    "l2_flush_bytes_before_each_trial": 8000000000,
+    "l2_flush_timed": false,
+    "flashinfer_bracketing": "one run before and one run after each forced-row sweep",
+    "forced_rows": [0, 1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096],
+    "injection": "constant-work device uint8 OR over all Q flags at every level",
+    "operator_source_modified": false,
+    "repair_delta_reference": "instrumented zero-forced-row control"
+  },
+  "correctness_and_audit": {
+    "forced_configurations": 56,
+    "all_preflight_and_postflight_exactness": "passed",
+    "all_kineto_topology_gates": "passed",
+    "maximum_natural_failures_in_fixed_timing_fixtures": 0,
+    "post_injection_count_equaled_requested_count": true
+  },
+  "break_even": [
+    {
+      "variant": "r13a",
+      "context_tokens": 16384,
+      "flashinfer_p50_bracket_ms": [4.4335335, 4.4347375],
+      "instrumented_fast_p50_ms": 3.9030195,
+      "instrumented_fast_p95_ms": 3.9136782,
+      "conservative_repair_budget_ms": 0.530514,
+      "one_row_increment_ms": 0.1259535,
+      "p50_last_tested_win_rows": 256,
+      "p50_first_tested_loss_rows": 512,
+      "p95_last_tested_win_rows": 256,
+      "p95_first_tested_loss_rows": 512,
+      "all_row_p50_ms": 8.7525965
+    },
+    {
+      "variant": "r16a",
+      "context_tokens": 32768,
+      "flashinfer_p50_bracket_ms": [8.5744095, 8.6289235],
+      "instrumented_fast_p50_ms": 7.9531005,
+      "instrumented_fast_p95_ms": 7.9795842,
+      "conservative_repair_budget_ms": 0.621309,
+      "one_row_increment_ms": 0.296371,
+      "p50_last_tested_win_rows": 128,
+      "p50_first_tested_loss_rows": 256,
+      "p95_last_tested_win_rows": 128,
+      "p95_first_tested_loss_rows": 256,
+      "all_row_p50_ms": 18.845909
+    },
+    {
+      "variant": "r16a",
+      "context_tokens": 65536,
+      "flashinfer_p50_bracket_ms": [17.026726, 17.13487],
+      "instrumented_fast_p50_ms": 16.0261475,
+      "instrumented_fast_p95_ms": 16.128057,
+      "conservative_repair_budget_ms": 1.0005785,
+      "one_row_increment_ms": 0.6405165,
+      "p50_last_tested_win_rows": 128,
+      "p50_first_tested_loss_rows": 256,
+      "p95_last_tested_win_rows": 128,
+      "p95_first_tested_loss_rows": 256,
+      "all_row_p50_ms": 38.8605165
+    },
+    {
+      "variant": "r16a",
+      "context_tokens": 131072,
+      "flashinfer_p50_bracket_ms": [33.843571, 33.8509225],
+      "instrumented_fast_p50_ms": 32.1216305,
+      "instrumented_fast_p95_ms": 32.1385873,
+      "conservative_repair_budget_ms": 1.7219405,
+      "one_row_increment_ms": 1.3330965,
+      "p50_last_clear_win_rows": 64,
+      "p50_boundary_rows": 128,
+      "p50_boundary_delta_vs_lower_flashinfer_us": 1.611,
+      "p50_first_clear_loss_rows": 256,
+      "p95_last_tested_win_rows": 128,
+      "p95_first_tested_loss_rows": 256,
+      "all_row_p50_ms": 79.6051895
+    }
+  ],
+  "natural_trigger_evidence": {
+    "r13a_n16384_final_stack": {
+      "sample_seeds": 64,
+      "layers": [0, 15, 30, 45, 60],
+      "fixtures": ["A", "B"],
+      "invocations": 640,
+      "evaluated_rows": 2621440,
+      "repair_trigger_invocations": 5,
+      "invocation_trigger_rate": 0.0078125,
+      "invocation_trigger_rate_wilson_95": [0.0033415, 0.0181567],
+      "failed_rows": 9,
+      "row_failure_rate": 0.00000343323,
+      "maximum_failed_rows_in_one_invocation": 3,
+      "failure_cause": "underflow only"
+    },
+    "r16a_long_context_existing_32_seed_probe": [
+      {
+        "context_tokens": 32768,
+        "sample_elements": 512,
+        "invocations": 128,
+        "repair_trigger_invocations": 1,
+        "maximum_failed_rows_in_one_invocation": 1
+      },
+      {
+        "context_tokens": 65536,
+        "sample_elements": 1024,
+        "invocations": 128,
+        "repair_trigger_invocations": 1,
+        "maximum_failed_rows_in_one_invocation": 1
+      },
+      {
+        "context_tokens": 131072,
+        "sample_elements": 1536,
+        "invocations": 128,
+        "repair_trigger_invocations": 1,
+        "maximum_failed_rows_in_one_invocation": 9
+      }
+    ]
+  },
+  "interpretation": {
+    "exactness": "distribution-independent inside the declared support domain because every tested underflow/overflow flag is repaired on device",
+    "performance": "distribution-dependent through both invocation trigger probability and the number of simultaneously failed rows",
+    "cost_shape": "stepwise rather than per-row linear; one failed row activates a persistent repair grid and additional waves appear near larger row counts",
+    "observed_natural_tail": "all observed natural repair clusters remain far below the measured break-even row counts",
+    "worst_case": "frequent large repair clusters can erase the fast-path gain and can be substantially slower than FlashInfer"
+  },
+  "limitations": [
+    "The forced-row sweep is diagnostic rather than a release campaign and uses one layer per context.",
+    "Forced levels are ordered; FlashInfer pre/post bracketing bounds temporal drift but is not full per-level AB/BA pairing.",
+    "Natural multi-seed tail latency is projected by joining trigger counts with the forced-cost curve; it was not timed as one mixed 640-invocation CUPTI campaign.",
+    "Long-context trigger evidence is layer 0 only and uses 32 sample seeds."
+  ],
+  "artifacts": {
+    "compact_public_summary": "repair-trigger-tail-break-even-h20-v1.json",
+    "raw_artifacts": "not redistributed"
+  }
+}

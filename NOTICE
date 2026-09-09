@@ -1,0 +1,14 @@
+IndexTopK-PerfLab
+Copyright (c) 2026 IndexTopK-PerfLab contributors
+
+This research artifact integrates with, but does not vendor, the following
+projects:
+
+- DeepGEMM, Copyright DeepSeek contributors, MIT License.
+- FlashInfer, Copyright FlashInfer contributors, Apache License 2.0.
+- PyTorch, Copyright PyTorch contributors, BSD-style License.
+
+The candidate producer is a project-local derivative of the pinned DeepGEMM
+SM90 MQA indexer implementation. See THIRD_PARTY.md for exact revisions and
+upstream links. Third-party names are used only to identify dependencies and
+baselines; no endorsement is implied.

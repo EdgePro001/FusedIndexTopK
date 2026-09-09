@@ -1,0 +1,19 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.venv/
+.DS_Store
+
+# Generated benchmark and profiler artifacts.
+artifacts/
+profiles/
+*.ncu-rep
+*.nsys-rep
+*.sqlite
+
+# JIT outputs.
+.cache/
+build/
+dist/

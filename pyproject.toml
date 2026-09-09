@@ -1,0 +1,62 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "index-topk-perflab"
+version = "0.1.0"
+description = "Controlled H20 performance lab for DSA Indexer, exact TopK, and fused variants"
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE", "NOTICE"]
+requires-python = ">=3.10"
+dependencies = []
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+
+[project.scripts]
+itk-perflab = "index_topk_perflab.cli:main"
+
+[project.optional-dependencies]
+test = ["pytest>=7", "ruff>=0.12"]
+
+[project.entry-points."index_topk_perflab.variants"]
+deepgemm_torch_unfused = "index_topk_perflab.variants.deepgemm_torch:create_variant"
+deepgemm_flashinfer_topk_auto = "index_topk_perflab.variants.deepgemm_flashinfer.plugin:create_auto_variant"
+index_topk_r13a = "index_topk_perflab.experimental.fused_r13a_nsweep.plugin:create_variant"
+index_topk_r16a = "index_topk_perflab.experimental.fused_r16a.plugin:create_variant"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+index_topk_perflab = [
+  "experimental/**/*.cpp",
+  "experimental/**/*.cu",
+  "experimental/**/*.cuh",
+  "experimental/**/*.hpp",
+  "variants/**/*.cu",
+  "variants/**/*.json",
+]
+
+[tool.pytest.ini_options]
+addopts = "-ra"
+pythonpath = ["src"]
+testpaths = ["tests"]
+
+[tool.ruff]
+target-version = "py310"
+line-length = 100
+extend-exclude = ["archive"]
+
+[tool.ruff.lint]
+select = ["B", "E", "F", "I"]
