@@ -1,12 +1,57 @@
 # FusedIndexTopK
 
-High-performance fused Indexer and exact Top-K kernels for the **DeepSeek V3.2
-sparse-attention architecture**, built with **DeepGEMM-style CUDA design**,
-device-side exact repair, and reproducible GPU benchmarks. This public artifact
-contains the final operator, the exactness and timing harness, and
-compact machine-readable evidence. It intentionally excludes abandoned kernel
-variants, raw profiler dumps, private machine paths, model weights, and replay
-tensors.
+> **Exact Top-K without materializing the dense `Q×N` score matrix.**
+
+FusedIndexTopK is a high-performance fused Indexer and exact Top-K operator for
+the **DeepSeek V3.2 sparse-attention architecture**. It combines
+**DeepGEMM-style FP8 score production**, compact candidate generation, exact
+radix selection, and device-side repair in one bounded-memory pipeline.
+
+| Exact semantics | Fused dataflow | Reproducible evidence |
+|---|---|---|
+| Device repair handles fast-path underflow and overflow | Scores flow directly into compact candidates; no dense score matrix | Frozen H20 workload, CUPTI timing, CUDA Event guardrail, and held-out replay splits |
+
+This repository is the clean research artifact: it contains the final operator,
+the correctness and timing harness, and compact machine-readable results. It
+intentionally excludes abandoned variants, raw profiler dumps, private machine
+paths, model weights, and replay tensors.
+
+## Why fuse Indexer and Top-K?
+
+The conventional baseline writes a full score matrix to HBM and asks a separate
+Top-K kernel to read it back. FusedIndexTopK keeps only promising score/index
+pairs, reducing intermediate traffic while retaining exact output through a
+device-masked repair path.
+
+```mermaid
+flowchart LR
+  subgraph baseline[Conventional baseline]
+    B0[FP8 Q / KV] --> B1[DeepGEMM Indexer]
+    B1 --> B2[Dense Q × N scores in HBM]
+    B2 --> B3[FlashInfer exact Top-K]
+  end
+
+  subgraph fused[FusedIndexTopK]
+    F0[FP8 Q / KV] --> F1[Random-token sample]
+    F1 --> F2[Conservative threshold]
+    F0 --> F3[Persistent score + candidate producer]
+    F2 --> F3
+    F3 --> F4[Compact score/index pairs]
+    F4 --> F5[Exact radix reducer]
+    F5 --> F6[Top-2048 indices]
+    F5 -->|underflow / overflow| F7[Device-masked exact repair]
+    F7 --> F6
+  end
+
+  classDef io fill:#172554,stroke:#60a5fa,color:#eff6ff;
+  classDef compute fill:#052e16,stroke:#4ade80,color:#f0fdf4;
+  classDef memory fill:#431407,stroke:#fb923c,color:#fff7ed;
+  classDef repair fill:#3b0764,stroke:#c084fc,color:#faf5ff;
+  class B0,F0 io;
+  class B1,B3,F1,F2,F3,F5 compute;
+  class B2,F4 memory;
+  class F7 repair;
+```
 
 ## Result at a glance
 
@@ -26,7 +71,13 @@ FusedIndexTopK's median reduction versus the independent DeepGEMM +
 long-context repair uses bounded workspace, but the long-context evidence is
 deliberately labeled development rather than gold.
 
-## What is new
+![Short-context H20 CUPTI latency for FusedIndexTopK, DeepGEMM plus FlashInfer, and DeepGEMM plus torch.topk](docs/assets/short-context-cupti.svg)
+
+*Each point is the median of the 10 published per-cell medians for that context
+length: five model layers × two held-out replay splits. Values come directly
+from [`results/fused-index-topk-short-context-h20-v1.csv`](results/fused-index-topk-short-context-h20-v1.csv).*
+
+## How it works
 
 The operator avoids materializing the dense score matrix. Its fast path:
 
