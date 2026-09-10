@@ -23,35 +23,12 @@ Top-K kernel to read it back. FusedIndexTopK keeps only promising score/index
 pairs, reducing intermediate traffic while retaining exact output through a
 device-masked repair path.
 
-```mermaid
-flowchart LR
-  subgraph baseline[Conventional baseline]
-    B0[FP8 Q / KV] --> B1[DeepGEMM Indexer]
-    B1 --> B2[Dense Q × N scores in HBM]
-    B2 --> B3[FlashInfer exact Top-K]
-  end
+![FusedIndexTopK architecture compared with the conventional DeepGEMM and FlashInfer pipeline](docs/assets/fused-index-topk-architecture.png)
 
-  subgraph fused[FusedIndexTopK]
-    F0[FP8 Q / KV] --> F1[Random-token sample]
-    F1 --> F2[Conservative threshold]
-    F0 --> F3[Persistent score + candidate producer]
-    F2 --> F3
-    F3 --> F4[Compact score/index pairs]
-    F4 --> F5[Exact radix reducer]
-    F5 --> F6[Top-2048 indices]
-    F5 -->|underflow / overflow| F7[Device-masked exact repair]
-    F7 --> F6
-  end
-
-  classDef io fill:#172554,stroke:#60a5fa,color:#eff6ff;
-  classDef compute fill:#052e16,stroke:#4ade80,color:#f0fdf4;
-  classDef memory fill:#431407,stroke:#fb923c,color:#fff7ed;
-  classDef repair fill:#3b0764,stroke:#c084fc,color:#faf5ff;
-  class B0,F0 io;
-  class B1,B3,F1,F2,F3,F5 compute;
-  class B2,F4 memory;
-  class F7 repair;
-```
+*Figure 1. The conventional pipeline materializes and rereads all `Q×N`
+scores. FusedIndexTopK streams compact candidates into an exact radix reducer;
+device-masked repair preserves exact Top-K when the sampled fast path flags
+underflow or overflow.*
 
 ## Result at a glance
 
