@@ -38,7 +38,7 @@ fi
 cache_key="${ITK_VARIANT_CACHE_KEY:-}"
 if [[ -z "${cache_key}" ]]; then
     requested_variant=""
-    requested_config="configs/r13a_h20_release.json"
+    requested_config="configs/fused_index_topk_h20.json"
     requested_length=""
     arguments=("$@")
     for ((index = 0; index < ${#arguments[@]}; index++)); do

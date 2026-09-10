@@ -15,7 +15,7 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 def test_resolved_fusion_problem_is_explicit_and_machine_readable() -> None:
-    config = load_config(ROOT / "configs" / "r13a_h20_release.json")
+    config = load_config(ROOT / "configs" / "fused_index_topk_h20.json")
     contract = resolved_problem_contract(config)
 
     assert contract["version"] == "fusion-v1"
@@ -76,7 +76,7 @@ def test_resolved_fusion_problem_is_explicit_and_machine_readable() -> None:
 
 
 def test_formal_plan_identity_excludes_diagnostic_profile_controls() -> None:
-    config = load_config(ROOT / "configs" / "r13a_h20_release.json")
+    config = load_config(ROOT / "configs" / "fused_index_topk_h20.json")
     changed = replace(
         config,
         profiling=replace(

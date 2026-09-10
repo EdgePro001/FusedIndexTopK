@@ -19,7 +19,7 @@ _run = LIVE_PROGRESS["_run"]
 
 
 def test_progress_uses_the_frozen_benchmark_order() -> None:
-    cases = _load_cases(ROOT / "configs" / "r13a_h20_release.json")
+    cases = _load_cases(ROOT / "configs" / "fused_index_topk_h20.json")
     assert cases[0] == (4096, 6144)
     assert cases[-1] == (4096, 16384)
     assert len(cases) == 4

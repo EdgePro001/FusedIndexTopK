@@ -1,7 +1,7 @@
 PYTHON ?= python3
-CONFIG ?= configs/r13a_h20_release.json
+CONFIG ?= configs/fused_index_topk_h20.json
 VARIANT ?= deepgemm_flashinfer_topk_auto
-CANDIDATE ?= deepgemm_fused_candidate_topk_r13a_nsweep
+CANDIDATE ?= fused_index_topk
 RUN_ID ?= itk-manual
 EVAL_RUN_ID ?= h20-eval-$(shell date -u +%Y%m%dT%H%M%SZ)
 MODE ?= screening

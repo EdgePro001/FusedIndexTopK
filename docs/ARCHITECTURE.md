@@ -1,6 +1,6 @@
 # Operator architecture
 
-## R13a (6K–16K qualified range)
+## Short-context path (6K–16K qualified range)
 
 The public operator is a multi-kernel device pipeline. `prepare()` allocates all
 workspace before timing; a timed invocation performs the following stages:
@@ -27,9 +27,9 @@ working set and records any condition that could invalidate the fast result.
 The threshold is only a performance optimization. It is not part of the
 correctness proof: every detected capacity failure is routed to exact repair.
 
-## R16a (long-context extension)
+## Long-context path
 
-R16a leaves the R13a fast producer and reducer unchanged. If a row is flagged,
+FusedIndexTopK keeps the same fast producer and reducer. If a row is flagged,
 the row is rescored in chunks of at most 16,384 keys. Every chunk is reduced to
 an exact local Top-2048 and merged with a Top-2048 packed-pair accumulator.
 
@@ -37,7 +37,7 @@ An item outside a chunk's local Top-K cannot enter the global Top-K, so the
 hierarchical merge is exact. Workspace is bounded by one 16K candidate tile and
 `O(QK)` local/accumulator buffers rather than `O(QN)` dense scores.
 
-At `N=16384`, R16a dispatches directly to the unchanged R13a graph.
+At `N<=16384`, the operator uses the complete-row repair path directly.
 
 ## Output contract
 

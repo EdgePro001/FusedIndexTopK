@@ -47,7 +47,7 @@ def _runtime() -> dict:
 
 def test_frozen_h20_runtime_contract_accepts_matching_installation() -> None:
     validate_runtime(
-        _runtime(), load_config(ROOT / "configs" / "r13a_h20_release.json")
+        _runtime(), load_config(ROOT / "configs" / "fused_index_topk_h20.json")
     )
 
 
@@ -56,7 +56,7 @@ def test_runtime_rejects_unbound_deepgemm_binary() -> None:
     runtime["imports"]["deep_gemm"]["distribution_version"] = "2.0.0+deadbee"
     with pytest.raises(RuntimeError, match="not built from the frozen checkout"):
         validate_runtime(
-            runtime, load_config(ROOT / "configs" / "r13a_h20_release.json")
+            runtime, load_config(ROOT / "configs" / "fused_index_topk_h20.json")
         )
 
 
@@ -71,7 +71,7 @@ def test_runtime_ignores_process_on_nonvisible_gpu() -> None:
         }
     ]
     validate_runtime(
-        runtime, load_config(ROOT / "configs" / "r13a_h20_release.json")
+        runtime, load_config(ROOT / "configs" / "fused_index_topk_h20.json")
     )
 
 
@@ -87,7 +87,7 @@ def test_runtime_rejects_process_on_selected_gpu() -> None:
     ]
     with pytest.raises(RuntimeError, match="other compute processes"):
         validate_runtime(
-            runtime, load_config(ROOT / "configs" / "r13a_h20_release.json")
+            runtime, load_config(ROOT / "configs" / "fused_index_topk_h20.json")
         )
 
 

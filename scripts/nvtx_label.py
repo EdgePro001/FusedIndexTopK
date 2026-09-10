@@ -18,7 +18,7 @@ from index_topk_perflab.registry import load_variant
 
 def _parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--config", default="configs/r13a_h20_release.json")
+    parser.add_argument("--config", default="configs/fused_index_topk_h20.json")
     parser.add_argument("--variant", required=True)
     parser.add_argument("--target-length", type=int, required=True)
     parser.add_argument(

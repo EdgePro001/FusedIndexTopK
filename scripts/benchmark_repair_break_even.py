@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Measure exact-repair latency as a controlled function of failed rows.
 
-This is an out-of-band diagnostic.  It leaves the promoted R13a/R16a device
-implementations unchanged and inserts one constant-work device OR between the
+This is an out-of-band diagnostic. It leaves the public FusedIndexTopK device
+implementation unchanged and inserts one constant-work device OR between the
 fast reducer and repair.  Every forced-row level, including zero, pays for the
 same injection kernel, so repair deltas are measured against the instrumented
 zero-row control rather than against an uninstrumented operator.
@@ -42,8 +42,7 @@ from index_topk_perflab.runtime import (
 )
 
 BASE_VARIANTS = {
-    "r13a": "index_topk_perflab.experimental.fused_r13a.plugin:create_variant",
-    "r16a": "index_topk_perflab.experimental.fused_r16a.plugin:create_variant",
+    "fused": "index_topk_perflab.experimental.fused_index_topk.plugin:create_variant",
 }
 REFERENCE_FACTORY = "index_topk_perflab.variants.deepgemm_torch:create_variant"
 FLASHINFER_FACTORY = "index_topk_perflab.variants.deepgemm_flashinfer.plugin:create_auto_variant"
@@ -317,7 +316,7 @@ def main() -> None:
     parser.add_argument(
         "--runtime-config",
         type=Path,
-        default=Path("configs/r13a_h20_release.json"),
+        default=Path("configs/fused_index_topk_h20.json"),
     )
     args = parser.parse_args()
 

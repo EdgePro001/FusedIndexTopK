@@ -153,7 +153,7 @@ def _capture(args: argparse.Namespace) -> None:
         replay_case = replay_cases[0]
         # Keep the config-derived case ID so the existing stable NVTX label and
         # wrapper-side filter remain unchanged.  The replay benchmark seed is
-        # retained because it is part of R3's deterministic sampling path.
+        # retained because it is part of the deterministic sampling path.
         case = replace(case, seed=replay_case.seed)
 
         def load_replay_inputs(requested_case: Any, device: Any, fixture_id: str) -> Any:
@@ -545,7 +545,7 @@ def _parser() -> argparse.ArgumentParser:
 
     capture = subparsers.add_parser("capture", help="run one profiler target capture")
     capture.add_argument(
-        "--config", type=Path, default=Path("configs/r13a_h20_release.json")
+        "--config", type=Path, default=Path("configs/fused_index_topk_h20.json")
     )
     capture.add_argument("--variant", required=True)
     capture.add_argument("--target-length", type=int, required=True)

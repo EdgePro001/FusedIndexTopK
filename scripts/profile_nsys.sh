@@ -4,7 +4,7 @@ set -euo pipefail
 project_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "${project_root}"
 
-config="configs/r13a_h20_release.json"
+config="configs/fused_index_topk_h20.json"
 variant=""
 target_length=""
 run_id=""

@@ -9,8 +9,8 @@
     "indexer_heads": 64,
     "head_dim": 128,
     "data": "held-out DeepSeek-V3.2 replay test_hard A/B",
-    "r13a_context_and_layer": "N=16384, layer 30",
-    "r16a_contexts_and_layer": "N=32768/65536/131072, layer 0"
+    "short_context_and_layer": "N=16384, layer 30",
+    "long_contexts_and_layer": "N=32768/65536/131072, layer 0"
   },
   "protocol": {
     "warmup_iterations": 10,
@@ -33,7 +33,7 @@
   },
   "break_even": [
     {
-      "variant": "r13a",
+      "variant": "fused_index_topk",
       "context_tokens": 16384,
       "flashinfer_p50_bracket_ms": [4.4335335, 4.4347375],
       "instrumented_fast_p50_ms": 3.9030195,
@@ -47,7 +47,7 @@
       "all_row_p50_ms": 8.7525965
     },
     {
-      "variant": "r16a",
+      "variant": "fused_index_topk",
       "context_tokens": 32768,
       "flashinfer_p50_bracket_ms": [8.5744095, 8.6289235],
       "instrumented_fast_p50_ms": 7.9531005,
@@ -61,7 +61,7 @@
       "all_row_p50_ms": 18.845909
     },
     {
-      "variant": "r16a",
+      "variant": "fused_index_topk",
       "context_tokens": 65536,
       "flashinfer_p50_bracket_ms": [17.026726, 17.13487],
       "instrumented_fast_p50_ms": 16.0261475,
@@ -75,7 +75,7 @@
       "all_row_p50_ms": 38.8605165
     },
     {
-      "variant": "r16a",
+      "variant": "fused_index_topk",
       "context_tokens": 131072,
       "flashinfer_p50_bracket_ms": [33.843571, 33.8509225],
       "instrumented_fast_p50_ms": 32.1216305,
@@ -92,7 +92,7 @@
     }
   ],
   "natural_trigger_evidence": {
-    "r13a_n16384_final_stack": {
+    "short_context_n16384": {
       "sample_seeds": 64,
       "layers": [0, 15, 30, 45, 60],
       "fixtures": ["A", "B"],
@@ -106,7 +106,7 @@
       "maximum_failed_rows_in_one_invocation": 3,
       "failure_cause": "underflow only"
     },
-    "r16a_long_context_existing_32_seed_probe": [
+    "long_context_32_seed_probe": [
       {
         "context_tokens": 32768,
         "sample_elements": 512,

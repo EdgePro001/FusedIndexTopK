@@ -20,7 +20,7 @@ same ordered activity sequence and requires every declared stage to be fully
 covered. This prevents accidental inclusion of the flush or omission of a
 candidate kernel.
 
-## R13a release campaign
+## FusedIndexTopK release campaign
 
 - GPU: NVIDIA H20-3e, SM90, 78 SMs;
 - Q=4096, K=2048, H=64, D=128;
@@ -29,8 +29,8 @@ candidate kernel.
 - held-out `test_normal` and `test_hard` replay splits;
 - A/B fixture bytes matched within each comparison cell;
 - 10 warmups, 20 Event trials, and 30 CUPTI trials per process;
-- three independent balanced-order blocks: FlashInfer/R13a/Torch,
-  R13a/Torch/FlashInfer, Torch/FlashInfer/R13a.
+- three independent balanced-order blocks: FlashInfer/FusedIndexTopK/Torch,
+  FusedIndexTopK/Torch/FlashInfer, Torch/FlashInfer/FusedIndexTopK.
 
 The aggregate uses the median of block medians for each of 40 cells. Confidence
 intervals are a deterministic nonparametric bootstrap across cells. They do not
@@ -49,7 +49,7 @@ Before and after benchmark trials, the harness checks:
 - source, runtime, protocol, plan, and input-content fingerprints.
 
 Fault-injection cases force all rows through underflow repair, working-capacity
-overflow repair, and all-equal-score repair. R16a additionally tests partial
+overflow repair, and all-equal-score repair. The long-context path additionally tests partial
 tail chunks and CUDA memcheck/racecheck.
 
 ## Replay data policy
@@ -61,3 +61,8 @@ this repository; only aggregate evidence and hashes are public.
 
 This means another user can reproduce the code and protocol, but not the exact
 input bytes without independently generating a compatible replay corpus.
+
+The public packaging was flattened after qualification so only one operator is
+exposed. The measured sampling, producer, reducer, and repair CUDA sources were
+verified byte-for-byte against the qualified sources; only module layout,
+Python dispatch, and public binding names changed.

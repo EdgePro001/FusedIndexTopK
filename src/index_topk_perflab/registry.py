@@ -17,12 +17,8 @@ BUILTIN_VARIANTS = {
         "index_topk_perflab.variants.deepgemm_flashinfer.plugin:"
         "create_auto_variant"
     ),
-    "index_topk_r13a": (
-        "index_topk_perflab.experimental.fused_r13a_nsweep.plugin:"
-        "create_variant"
-    ),
-    "index_topk_r16a": (
-        "index_topk_perflab.experimental.fused_r16a.plugin:create_variant"
+    "fused_index_topk": (
+        "index_topk_perflab.experimental.fused_index_topk.plugin:create_variant"
     ),
 }
 
@@ -104,5 +100,5 @@ def load_variant(
             f"{plugin.descriptor.mode!r}"
         )
     if not plugin.descriptor.exact_topk:
-        raise TypeError("IndexTopK-PerfLab accepts only exact TopK variants")
+        raise TypeError("FusedIndexTopK accepts only exact TopK variants")
     return plugin

@@ -37,12 +37,8 @@ VARIANTS = {
         "index_topk_perflab.variants.deepgemm_flashinfer.plugin:create_auto_variant",
         {"verbose_build": False},
     ),
-    "r13a": (
-        "index_topk_perflab.experimental.fused_r13a_nsweep.plugin:create_variant",
-        {"verbose_build": False},
-    ),
-    "r16a": (
-        "index_topk_perflab.experimental.fused_r16a.plugin:create_variant",
+    "fused": (
+        "index_topk_perflab.experimental.fused_index_topk.plugin:create_variant",
         {"verbose_build": False},
     ),
 }
@@ -98,7 +94,7 @@ def main() -> None:
     parser.add_argument("--manifest", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--splits", nargs="+", default=["test_normal", "test_hard"])
-    parser.add_argument("--variants", nargs="+", default=["flashinfer", "r13a"])
+    parser.add_argument("--variants", nargs="+", default=["flashinfer", "fused"])
     parser.add_argument("--contexts", type=int, nargs="+", default=[])
     parser.add_argument("--warmup-iterations", type=int, default=10)
     parser.add_argument("--event-trials", type=int, default=20)
@@ -108,7 +104,7 @@ def main() -> None:
     parser.add_argument(
         "--runtime-config",
         type=Path,
-        default=Path("configs/r13a_h20_release.json"),
+        default=Path("configs/fused_index_topk_h20.json"),
     )
     args = parser.parse_args()
 

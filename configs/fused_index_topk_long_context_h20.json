@@ -1,0 +1,100 @@
+{
+  "schema_version": 4,
+  "name": "fused_index_topk_long_context_h20_v1",
+  "seed": 20260909,
+  "target": {
+    "gpu_name": "NVIDIA H20-3e",
+    "compute_capability": [9, 0],
+    "multiprocessor_count": 78,
+    "total_memory_bytes": 150109880320,
+    "require_single_visible_gpu": true
+  },
+  "sources": {
+    "deep_gemm_commit": "7c95b14aa4a66edd7b682e5acdde62351ca81197",
+    "torch_version": "2.10.0+cu130"
+  },
+  "workload": {
+    "batch_size": 1,
+    "benchmark_cases": [
+      {"query_tokens": 4096, "context_tokens": 32768},
+      {"query_tokens": 4096, "context_tokens": 65536},
+      {"query_tokens": 4096, "context_tokens": 131072}
+    ],
+    "correctness_cases": [
+      {"query_tokens": 4096, "context_tokens": 32768},
+      {"query_tokens": 4096, "context_tokens": 65536},
+      {"query_tokens": 4096, "context_tokens": 131072}
+    ],
+    "top_k": 2048,
+    "indexer_heads": 64,
+    "head_dim": 128,
+    "causal": true,
+    "q_dtype": "float8_e4m3fn",
+    "kv_dtype": "float8_e4m3fn",
+    "kv_scale_dtype": "float32",
+    "weight_dtype": "float32",
+    "range_dtype": "int32",
+    "score_dtype": "float32",
+    "output_dtype": "int32",
+    "selection": "exact",
+    "output_order": "unordered",
+    "padding_index": -1,
+    "tie_policy": "exact_score_threshold",
+    "causal_range": "[0,N-Q+q+1)"
+  },
+  "timing": {
+    "method": "deepgemm_kineto_cupti_v1",
+    "warmup_iterations": 10,
+    "event_trials": 20,
+    "kineto_trials": 30,
+    "l2_flush_bytes": 8000000000,
+    "cooldown_seconds": 0.0,
+    "campaign_repetitions": 3,
+    "campaign_orders": ["ABBA", "BAAB", "ABBA"]
+  },
+  "profiling": {
+    "nsys_cases": [
+      {"query_tokens": 4096, "context_tokens": 32768},
+      {"query_tokens": 4096, "context_tokens": 65536},
+      {"query_tokens": 4096, "context_tokens": 131072}
+    ],
+    "ncu_cases": [
+      {"query_tokens": 4096, "context_tokens": 32768},
+      {"query_tokens": 4096, "context_tokens": 131072}
+    ],
+    "captured_iterations": 1,
+    "ncu_metrics": [
+      "dram__bytes_read.sum",
+      "dram__bytes_write.sum",
+      "lts__t_sectors_op_read.sum",
+      "lts__t_sectors_op_write.sum",
+      "lts__t_sector_hit_rate.pct",
+      "sm__throughput.avg.pct_of_peak_sustained_elapsed"
+    ],
+    "ncu_sections": [
+      "LaunchStats",
+      "Occupancy",
+      "SpeedOfLight",
+      "ComputeWorkloadAnalysis",
+      "MemoryWorkloadAnalysis",
+      "SchedulerStats",
+      "WarpStateStats"
+    ]
+  },
+  "exact_reference_variant": "deepgemm_torch_unfused",
+  "baseline_variant": "deepgemm_flashinfer_topk_auto",
+  "variants": {
+    "deepgemm_torch_unfused": {
+      "factory": "index_topk_perflab.variants.deepgemm_torch:create_variant",
+      "options": {"sorted": false}
+    },
+    "deepgemm_flashinfer_topk_auto": {
+      "factory": "index_topk_perflab.variants.deepgemm_flashinfer.plugin:create_auto_variant",
+      "options": {"verbose_build": false}
+    },
+    "fused_index_topk": {
+      "factory": "index_topk_perflab.experimental.fused_index_topk.plugin:create_variant",
+      "options": {"verbose_build": false}
+    }
+  }
+}

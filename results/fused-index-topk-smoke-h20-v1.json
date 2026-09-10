@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "date": "2026-09-10",
+  "status": "passed",
+  "environment": {
+    "gpu": "NVIDIA H20-3e",
+    "source": "flattened FusedIndexTopK public snapshot",
+    "input": "deterministic synthetic standard-v2"
+  },
+  "framework_tests_passed": 113,
+  "cases": [
+    {
+      "variant": "fused_index_topk",
+      "dispatch": "short-context graph",
+      "context_tokens": 16384,
+      "query_tokens": 4096,
+      "top_k": 2048,
+      "forced_underflow_rows": 0,
+      "fast_failure_rows": 0,
+      "unresolved_failure_rows": 0,
+      "repair_error_rows": 0,
+      "value_mismatch_rows": 0,
+      "duplicate_output_rows": 0
+    },
+    {
+      "variant": "fused_index_topk",
+      "dispatch": "two-chunk long-context repair graph",
+      "context_tokens": 32768,
+      "query_tokens": 4096,
+      "top_k": 2048,
+      "forced_underflow_rows": 1,
+      "fast_failure_rows": 1,
+      "repair_chunks": 2,
+      "unresolved_failure_rows": 0,
+      "repair_error_rows": 0,
+      "value_mismatch_rows": 0,
+      "duplicate_output_rows": 0
+    }
+  ]
+}

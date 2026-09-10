@@ -223,12 +223,12 @@ def _benchmark(slot: dict, latency: float, plan: dict) -> dict:
 
 
 def test_three_campaign_plan_is_abba_baab_and_uses_campaign_level_ci(tmp_path) -> None:
-    config_path = ROOT / "configs" / "r13a_h20_release.json"
+    config_path = ROOT / "configs" / "fused_index_topk_h20.json"
     config = load_config(config_path)
     plan = build_campaign_plan(
         config,
         config_path=config_path,
-        candidate_variant="deepgemm_fused_candidate_topk_r13a_nsweep",
+        candidate_variant="fused_index_topk",
         run_id="unit-campaign",
         output_root=tmp_path,
     )
@@ -251,12 +251,12 @@ def test_three_campaign_plan_is_abba_baab_and_uses_campaign_level_ci(tmp_path) -
 
 
 def _written_campaign(tmp_path: Path) -> tuple[Path, dict]:
-    config_path = ROOT / "configs" / "r13a_h20_release.json"
+    config_path = ROOT / "configs" / "fused_index_topk_h20.json"
     config = load_config(config_path)
     plan = build_campaign_plan(
         config,
         config_path=config_path,
-        candidate_variant="deepgemm_fused_candidate_topk_r13a_nsweep",
+        candidate_variant="fused_index_topk",
         run_id="invalid-campaign",
         output_root=tmp_path,
     )

@@ -9,7 +9,7 @@ import pytest
 from index_topk_perflab.config import ConfigError, build_prefill_cases, load_config, parse_config
 
 ROOT = Path(__file__).resolve().parents[1]
-CONFIG = ROOT / "configs" / "r13a_h20_release.json"
+CONFIG = ROOT / "configs" / "fused_index_topk_h20.json"
 FUSION_CONFIG = CONFIG
 
 
@@ -23,7 +23,7 @@ def _fusion_raw() -> dict:
 
 def test_load_frozen_prefill_config_and_build_cases() -> None:
     config = load_config(CONFIG)
-    assert config.name == "fused_r13a_release_h20_v1"
+    assert config.name == "fused_index_topk_h20_v1"
     assert config.exact_reference_variant == "deepgemm_torch_unfused"
     assert config.baseline_variant == "deepgemm_flashinfer_topk_auto"
     assert config.target.compute_capability == (9, 0)

@@ -4,7 +4,7 @@ set -euo pipefail
 project_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "${project_root}"
 
-config="configs/r13a_h20_release.json"
+config="configs/fused_index_topk_h20.json"
 candidate=""
 baseline=""
 run_id="h20-eval-$(date -u +%Y%m%dT%H%M%SZ)"
@@ -21,7 +21,7 @@ Required:
 Options:
   --mode MODE           screening (default) or formal
   --run-id ID           safe, unique artifact prefix
-  --config PATH         default: configs/r13a_h20_release.json
+  --config PATH         default: configs/fused_index_topk_h20.json
   --baseline ID         default: baseline_variant from config
   --artifact-root PATH  default: /data/$USER/artifacts
 

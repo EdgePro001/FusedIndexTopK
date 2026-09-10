@@ -13,7 +13,7 @@ from index_topk_perflab.registry import load_variant
 from index_topk_perflab.runner import file_sha256, verify_correctness_artifact
 
 ROOT = Path(__file__).resolve().parents[1]
-CONFIG = ROOT / "configs" / "r13a_h20_release.json"
+CONFIG = ROOT / "configs" / "fused_index_topk_h20.json"
 
 
 def _artifact() -> tuple[dict, str, str]:

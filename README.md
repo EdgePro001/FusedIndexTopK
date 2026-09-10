@@ -3,7 +3,7 @@
 High-performance fused Indexer and exact Top-K kernels for the **DeepSeek V3.2
 sparse-attention architecture**, built with **DeepGEMM-style CUDA design**,
 device-side exact repair, and reproducible GPU benchmarks. This public artifact
-contains the final R13a/R16a kernels, the exactness and timing harness, and
+contains the final operator, the exactness and timing harness, and
 compact machine-readable evidence. It intentionally excludes abandoned kernel
 variants, raw profiler dumps, private machine paths, model weights, and replay
 tensors.
@@ -14,17 +14,17 @@ The workload is DeepSeek-V3.2-style prefill indexing with `Q=4096`, `K=2048`,
 64 indexer heads, head dimension 128, FP8 Q/KV, FP32 scales/weights, causal
 ranges, and unordered exact INT32 indices.
 
-| Candidate | Context N | Evidence status | Reduction vs DeepGEMM + FlashInfer |
+| Operator | Context N | Evidence status | Reduction vs DeepGEMM + FlashInfer |
 |---|---:|---|---:|
-| R13a | 6K–16K | gold, 5 layers × 2 held-out splits × 4 N | 14.71% median CUPTI; 40/40 cells won |
-| R16a | 32K | development, layer 0 × 2 held-out splits | 7.55%–7.77% CUPTI |
-| R16a | 64K | development, layer 0 × 2 held-out splits | 5.56%–5.70% CUPTI |
-| R16a | 128K | development, layer 0 × 2 held-out splits | 4.87%–5.66% CUPTI |
+| FusedIndexTopK | 6K–16K | gold, 5 layers × 2 held-out splits × 4 N | 14.71% median CUPTI; 40/40 cells won |
+| FusedIndexTopK | 32K | development, layer 0 × 2 held-out splits | 7.55%–7.77% CUPTI |
+| FusedIndexTopK | 64K | development, layer 0 × 2 held-out splits | 5.56%–5.70% CUPTI |
+| FusedIndexTopK | 128K | development, layer 0 × 2 held-out splits | 4.87%–5.66% CUPTI |
 
-R13a's median reduction versus the independent DeepGEMM + `torch.topk`
-reference is 30.13% by CUPTI. R16a extends exact repair beyond 16K with bounded
-workspace, but its long-context evidence is deliberately labeled development
-rather than gold.
+FusedIndexTopK's median reduction versus the independent DeepGEMM +
+`torch.topk` reference is 30.13% by CUPTI in the 6K–16K qualified range. Its
+long-context repair uses bounded workspace, but the long-context evidence is
+deliberately labeled development rather than gold.
 
 ## What is new
 
@@ -36,7 +36,7 @@ The operator avoids materializing the dense score matrix. Its fast path:
 4. detects candidate underflow and overflow entirely on device;
 5. repairs only flagged rows, preserving exact Top-K semantics.
 
-R16a keeps the R13a fast path and handles arbitrary longer rows in 16K chunks.
+The same public operator handles longer rows in 16K chunks.
 Each chunk produces an exact local Top-2048, then an online exact pair merge
 updates a fixed-size accumulator. No host flag read or dense `Q×N` score matrix
 is required.
@@ -47,7 +47,7 @@ Exactness does not rely on the sampled threshold succeeding: detected fast-path
 underflow or overflow is repaired on device. Performance does depend on repair
 frequency and correlated failure-cluster size.
 
-Across 640 held-out R13a replay invocations (2,621,440 rows), repair triggered in
+Across 640 held-out replay invocations (2,621,440 rows), repair triggered in
 5 invocations, covering 9 rows total; the largest cluster was 3 rows. Forced
 repair sweeps found the first P50 crossover against FlashInfer at 256–512 rows
 for 16K and 128–256 rows for 32K/64K. The 128K boundary is approximately 128
@@ -61,10 +61,12 @@ See [Results](docs/RESULTS.md), [repair analysis](docs/REPAIR_ANALYSIS.md), and
 
 ```text
 src/index_topk_perflab/
-  experimental/fused_r13a/   qualified <=16K producer
-  experimental/fused_r16a/   fixed-memory long-context repair
-  experimental/fused_r11d/   exact compact-candidate radix reducer
-  experimental/*             frozen internal components required by R13a/R16a
+  experimental/fused_index_topk/
+    plugin.py                 one public operator and dispatch
+    producer.py               fused score/candidate producer
+    candidate_reducer.py      exact compact-candidate radix reducer
+    long_repair.py            fixed-memory long-context repair
+    csrc/                     CUDA/JIT implementation sources
   variants/                   torch reference and FlashInfer baseline adapters
   benchmark.py, kineto.py     CUDA Event and Kineto/CUPTI timing
   correctness.py              exact score-threshold validation
@@ -75,10 +77,8 @@ results/                      compact public JSON/CSV evidence
 tests/                        CPU control-plane and GPU lifecycle tests
 ```
 
-The internal R5i–R11d modules are implementation dependencies of the measured
-R13a/R16a graph. They are retained byte-for-byte where possible so the public
-artifact remains traceable to the measured source; they are not advertised as
-public candidates.
+The registry exposes one fused implementation, `fused_index_topk`. PyTorch and
+FlashInfer remain only as correctness/performance references.
 
 ## Requirements
 
@@ -125,7 +125,7 @@ dataset contract and reproduction levels.
 
 ## Reproducibility levels
 
-- **Code reproduction:** build and validate R13a/R16a using synthetic inputs.
+- **Code reproduction:** build and validate FusedIndexTopK using synthetic inputs.
 - **Protocol reproduction:** rerun the published timing/correctness procedure on
   another H20 using locally generated replay tensors.
 - **Bitwise artifact reproduction:** requires the frozen private replay bytes;

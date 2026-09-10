@@ -16,7 +16,7 @@ from .provenance import variant_identity
 from .registry import available_variants, load_variant
 from .runner import default_run_id, run_benchmark, run_correctness
 
-DEFAULT_CONFIG = Path("configs/r13a_h20_release.json")
+DEFAULT_CONFIG = Path("configs/fused_index_topk_h20.json")
 
 
 def _default_artifact(run_id: str, variant: str, filename: str) -> Path:

@@ -1,0 +1,82 @@
+{
+  "all_semantic_exactness_gates_passed": true,
+  "case_count": 5,
+  "cases": {
+    "all_equal_scores": {
+      "bitwise_order_change_runs": 19,
+      "candidate_count_max": 16384,
+      "candidate_count_min": 12289,
+      "determinism_runs": 20,
+      "duplicate_output_rows": 0,
+      "fast_failure_rows": 4096,
+      "artifact_id": "correctness/all_equal_scores.json",
+      "repaired_failure_rows": 0,
+      "semantic_mismatch_runs": 0,
+      "unordered_set_change_runs": 0,
+      "value_mismatch_rows": 0,
+      "zero_weights": true
+    },
+    "forced_underflow_all_rows": {
+      "bitwise_order_change_runs": 1,
+      "candidate_count_max": 0,
+      "candidate_count_min": 0,
+      "determinism_runs": 2,
+      "duplicate_output_rows": 0,
+      "fast_failure_rows": 4096,
+      "artifact_id": "correctness/forced_underflow_all_rows.json",
+      "repaired_failure_rows": 0,
+      "semantic_mismatch_runs": 0,
+      "unordered_set_change_runs": 0,
+      "value_mismatch_rows": 0,
+      "zero_weights": false
+    },
+    "forced_working_overflow_all_rows": {
+      "bitwise_order_change_runs": 1,
+      "candidate_count_max": 6801,
+      "candidate_count_min": 6800,
+      "determinism_runs": 2,
+      "duplicate_output_rows": 0,
+      "fast_failure_rows": 4096,
+      "artifact_id": "correctness/forced_working_overflow_all_rows.json",
+      "repaired_failure_rows": 0,
+      "semantic_mismatch_runs": 0,
+      "unordered_set_change_runs": 0,
+      "value_mismatch_rows": 0,
+      "zero_weights": false
+    },
+    "natural_layer0_normal_a": {
+      "bitwise_order_change_runs": 19,
+      "candidate_count_max": 4313,
+      "candidate_count_min": 2579,
+      "determinism_runs": 20,
+      "duplicate_output_rows": 0,
+      "fast_failure_rows": 0,
+      "artifact_id": "correctness/natural_layer0_normal_a.json",
+      "repaired_failure_rows": 0,
+      "semantic_mismatch_runs": 0,
+      "unordered_set_change_runs": 0,
+      "value_mismatch_rows": 0,
+      "zero_weights": false
+    },
+    "natural_layer60_hard_b": {
+      "bitwise_order_change_runs": 19,
+      "candidate_count_max": 4740,
+      "candidate_count_min": 2762,
+      "determinism_runs": 20,
+      "duplicate_output_rows": 0,
+      "fast_failure_rows": 0,
+      "artifact_id": "correctness/natural_layer60_hard_b.json",
+      "repaired_failure_rows": 0,
+      "semantic_mismatch_runs": 0,
+      "unordered_set_change_runs": 9,
+      "value_mismatch_rows": 0,
+      "zero_weights": false
+    }
+  },
+  "measurement_source_identity_sha256": "cb041ad0787e9569594074d8d84a20cc443c57deaeb91307f102533f2a61853b",
+  "public_packaging_note": "The public API was flattened after measurement; measured CUDA implementation sources are byte-identical.",
+  "interpretation": "ID order and equal-cutoff ID choice may vary under the declared unordered score-threshold contract; every repetition remained exact",
+  "method": "FusedIndexTopK path-specific fault injection and repeated exactness",
+  "schema_version": 1,
+  "status": "passed"
+}

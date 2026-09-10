@@ -105,7 +105,7 @@ def normalize_measurement(row: Mapping[str, Any]) -> dict[str, Any]:
             "timing_source": "kineto_cupti",
             "derived": False,
         },
-        # Historical R1/R2 artifacts remain readable but are never mixed with
+        # Historical schema artifacts remain readable but are never mixed with
         # the schema-v4 CUPTI formal metric.
         "clean_total": {
             "scope_id": "discovery_total",

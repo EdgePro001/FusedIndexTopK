@@ -8,7 +8,7 @@ torch_lib="${venv}/lib/python3.12/site-packages/torch/lib"
 cuda_home="${CUDA_HOME:-/usr/local/cuda-13.0}"
 deepgemm_source="${runtime_root}/src/DeepGEMM-exact"
 flashinfer_source="${runtime_root}/src/flashinfer-v0.6.17"
-config="${project_root}/configs/r13a_h20_release.json"
+config="${project_root}/configs/fused_index_topk_h20.json"
 flashinfer_lock="${project_root}/src/index_topk_perflab/variants/deepgemm_flashinfer/SOURCE_LOCK.json"
 
 if [[ ! -x "${cuda_home}/bin/nvcc" ]]; then

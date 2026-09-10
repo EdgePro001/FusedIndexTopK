@@ -19,7 +19,7 @@ ROOT = Path(__file__).resolve().parents[1]
 
 def test_variant_identity_is_stable_and_cuda_lazy() -> None:
     sys.modules.pop("deep_gemm", None)
-    config = load_config(ROOT / "configs" / "r13a_h20_release.json")
+    config = load_config(ROOT / "configs" / "fused_index_topk_h20.json")
     # Exercise core provenance without requiring the H20 FlashInfer
     # source checkout selected by the formal configuration.
     variant_id = "deepgemm_torch_unfused"

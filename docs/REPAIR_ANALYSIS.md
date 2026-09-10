@@ -2,7 +2,7 @@
 
 ## Natural trigger evidence
 
-For final-stack R13a at 16K, a 64-seed probe across five layers and A/B hard
+For FusedIndexTopK at 16K, a 64-seed probe across five layers and A/B hard
 fixtures evaluated 640 invocations and 2,621,440 rows:
 
 - 5 invocations triggered repair: 0.78125%, Wilson 95% interval 0.334%–1.816%;

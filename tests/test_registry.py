@@ -60,4 +60,5 @@ def test_available_variants_contains_baseline() -> None:
     variants = available_variants()
     assert variants["deepgemm_torch_unfused"].endswith(":create_variant")
     assert variants["deepgemm_flashinfer_topk_auto"].endswith(":create_auto_variant")
+    assert variants["fused_index_topk"].endswith(":create_variant")
     assert "deepgemm_raft_select_k_auto" not in variants
