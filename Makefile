@@ -5,11 +5,12 @@ CANDIDATE ?= fused_index_topk
 RUN_ID ?= itk-manual
 EVAL_RUN_ID ?= h20-eval-$(shell date -u +%Y%m%dT%H%M%SZ)
 MODE ?= screening
-ARTIFACT_ROOT ?= /data/$(USER)/artifacts
+RUNTIME_ROOT ?= /data/$(USER)
+ARTIFACT_ROOT ?= $(RUNTIME_ROOT)/artifacts
 CORRECTNESS ?= $(ARTIFACT_ROOT)/raw/$(RUN_ID)/$(VARIANT)/correctness.json
 BENCHMARK ?= $(ARTIFACT_ROOT)/raw/$(RUN_ID)/$(VARIANT)/benchmark.json
 
-.PHONY: test lint variants setup-h20 check bench evaluate nsys ncu
+.PHONY: test lint variants setup-h20 check bench evaluate nsys ncu reproduce-smoke
 
 test:
 	$(PYTHON) -m pytest
@@ -37,3 +38,6 @@ nsys:
 
 ncu:
 	scripts/profile_ncu.sh --config $(CONFIG) --variant $(VARIANT) --target-length 16384 --stage indexer --run-id $(RUN_ID) --correctness $(CORRECTNESS) --output-root $(ARTIFACT_ROOT)/profiles
+
+reproduce-smoke:
+	ITK_RUNTIME_ROOT=$(RUNTIME_ROOT) scripts/reproduce.sh --level smoke
