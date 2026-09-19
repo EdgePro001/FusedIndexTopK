@@ -34,13 +34,28 @@ and three warps to exact Top-K. Double-buffered candidate slots and ready/free
 barriers let math produce query pair `i` while Top-K consumes pair `i - 1`;
 TMA continues feeding the math pipeline independently.
 
-![TMA, math, and Top-K work overlapped inside the persistent fused kernel](docs/assets/fused-pipeline-overlap.png)
+![Measured TMA, math, and Top-K overlap inside the persistent fused kernel](docs/assets/fused-pipeline-overlap.svg)
 
-The timeline is conceptual and not drawn to scale. In steady state, most Top-K
-work is hidden under later TMA and math work. The useful measure of fusion
-overhead is therefore the end-to-end gap between a matched math-only control
-and the fused kernel—not the standalone duration of the Top-K stage. A short
-exposed tail means the overlap is effective; it does not mean Top-K is free.
+This figure is drawn to scale from an H20 run at `Q=4096`, `N=16384`, and
+`K=2048` using held-out real-corpus replay. The upper panel shows five measured
+steady-state iterations from one persistent CTA; unequal block widths are the
+observed `clock64` intervals. Across the complete steady-state trace, **92.6%**
+of Top-K time overlaps TMA scheduling and/or tensor-core math. Median phase
+windows were 238.1k cycles for the TMA scheduler, 237.9k for math, and 114.7k
+for Top-K.
+
+The lower panel is a separate, non-diagnostic paired measurement: fused latency
+was only 111 us (3.0%) above Math-only on replay A and 115 us (3.2%) above it
+on replay B. Each result is the median of 48 paired hot-cache trials. Sampling
+and repair are excluded so the comparison isolates the normal fused path.
+
+The TMA interval includes scheduler back-pressure and asynchronous issue time;
+it is not exclusive TMA-engine residency. Diagnostic timestamps are used only
+to locate overlap, while formal latency comes from the non-diagnostic runs. The
+orange segment in the lower panel is the observed end-to-end delta, not a claim
+that Top-K is an isolated serial stage. The compact measurements and trace
+qualification are available in
+[the pipeline evidence JSON](results/fused-index-topk-pipeline-overlap-h20.json).
 
 ![Execution-path comparison for DeepGEMM plus FlashInfer, DeepGEMM plus DeepSelect, and FusedIndexTopK](docs/assets/execution-paths.svg)
 

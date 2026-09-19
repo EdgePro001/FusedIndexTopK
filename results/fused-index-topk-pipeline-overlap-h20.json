@@ -1,0 +1,186 @@
+{
+  "latency": {
+    "fixtures": [
+      {
+        "exposed_fraction": 0.030411663959992244,
+        "exposed_ms": 0.11079394817352295,
+        "fixture": "A",
+        "fused_ms": 3.643139958381653,
+        "math_only_ms": 3.53234601020813,
+        "repeats": 8,
+        "source_sha256": "0adb31e17e67393740d6942abbdafe514617c39e711504b55f8f3736f7f21056",
+        "trials": 48,
+        "warmup": 3
+      },
+      {
+        "exposed_fraction": 0.03172821360894102,
+        "exposed_ms": 0.11496400833129883,
+        "fixture": "B",
+        "fused_ms": 3.6233999729156494,
+        "math_only_ms": 3.5084359645843506,
+        "repeats": 8,
+        "source_sha256": "764b807f0ceeb730a4da719019f56a669167a32d554f9693cc8f0c92df55485e",
+        "trials": 48,
+        "warmup": 3
+      }
+    ],
+    "scope": "hot-cache single kernel; matched Math-only control; sampling and repair excluded"
+  },
+  "qualification": {
+    "fast_failure_rows": 0,
+    "trace_exact": true,
+    "unresolved_rows": 0,
+    "warning": "Diagnostic timestamps perturb the kernel and locate overlap only; latency values come from separate non-diagnostic paired runs."
+  },
+  "schema_version": 1,
+  "scope": {
+    "gpu": "NVIDIA H20-3e",
+    "input": "held-out real-corpus replay",
+    "k": 2048,
+    "kernel_path": "short-context fused path",
+    "n": 16384,
+    "q": 4096,
+    "split": "test_normal",
+    "trace_fixture": "A"
+  },
+  "title": "Measured TMA/Math/TopK overlap on H20",
+  "trace": {
+    "ctas": 156,
+    "pairs": 2048,
+    "raw_sha256": "8bf65624463fa9adb1a01bfbfb6fe9516fdf04f2f950e3540723f47ff5bab5e2",
+    "representative_intervals_cycles": [
+      {
+        "math": [
+          6110,
+          233596
+        ],
+        "pair_id": 861,
+        "sequence": 5,
+        "tma_issue": [
+          5799,
+          228127
+        ],
+        "tma_wait": [
+          0,
+          5799
+        ],
+        "topk": [
+          233877,
+          343194
+        ]
+      },
+      {
+        "math": [
+          234029,
+          464923
+        ],
+        "pair_id": 1017,
+        "sequence": 6,
+        "tma_issue": [
+          233890,
+          460551
+        ],
+        "tma_wait": [
+          228248,
+          233890
+        ],
+        "topk": [
+          466212,
+          578231
+        ]
+      },
+      {
+        "math": [
+          465461,
+          703903
+        ],
+        "pair_id": 1173,
+        "sequence": 7,
+        "tma_issue": [
+          466238,
+          698995
+        ],
+        "tma_wait": [
+          460670,
+          466238
+        ],
+        "topk": [
+          704872,
+          823945
+        ]
+      },
+      {
+        "math": [
+          704647,
+          946406
+        ],
+        "pair_id": 1329,
+        "sequence": 8,
+        "tma_issue": [
+          704928,
+          941929
+        ],
+        "tma_wait": [
+          699074,
+          704928
+        ],
+        "topk": [
+          947352,
+          1061811
+        ]
+      },
+      {
+        "math": [
+          947033,
+          1194930
+        ],
+        "pair_id": 1485,
+        "sequence": 9,
+        "tma_issue": [
+          947368,
+          1190546
+        ],
+        "tma_wait": [
+          942004,
+          947368
+        ],
+        "topk": [
+          1196065,
+          1317695
+        ]
+      }
+    ],
+    "selection": {
+      "cta": 81,
+      "first_sequence": 5,
+      "global_median_cycles": {
+        "math": 237903.5,
+        "tma_issue": 232626.0,
+        "tma_total": 238140.0,
+        "tma_wait": 5648.0,
+        "topk": 114737.0
+      },
+      "pair_ids": [
+        861,
+        1017,
+        1173,
+        1329,
+        1485
+      ],
+      "rule": "five consecutive steady-state iterations minimizing the sum of normalized median deviations across TMA total/wait/issue, Math, and TopK",
+      "score": 0.007088767835070878,
+      "window_median_cycles": {
+        "math": 238442,
+        "tma_issue": 232757,
+        "tma_total": 238325,
+        "tma_wait": 5642,
+        "topk": 114459
+      }
+    },
+    "steady_pairs": 1736,
+    "timestamp_domain": "SM-local clock64; compare only within a persistent CTA",
+    "tma_definition": "scheduler interval including barrier back-pressure and asynchronous issue; not exclusive TMA-engine residency",
+    "topk_time_overlapped_by_tma_or_math_fraction": 0.9264863914701572,
+    "warmup_pairs_excluded_per_cta": 2
+  }
+}
