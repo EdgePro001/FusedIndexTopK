@@ -20,9 +20,9 @@ _run = LIVE_PROGRESS["_run"]
 
 def test_progress_uses_the_frozen_benchmark_order() -> None:
     cases = _load_cases(ROOT / "configs" / "fused_index_topk_h20.json")
-    assert cases[0] == (4096, 6144)
-    assert cases[-1] == (4096, 16384)
-    assert len(cases) == 4
+    assert cases[0] == (4096, 8192)
+    assert cases[-1] == (4096, 163840)
+    assert len(cases) == 6
 
 
 def test_case_path_matches_runner_atomic_layout(tmp_path: Path) -> None:

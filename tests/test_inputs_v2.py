@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from index_topk_perflab.inputs import input_stream_seeds
+from fused_index_topk.inputs import input_stream_seeds
 
 
 def test_rng_streams_are_stable_independent_and_fixture_specific() -> None:

@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="520" viewBox="0 0 1200 520" role="img" aria-labelledby="title desc">
+  <title id="title">Execution path comparison</title>
+  <desc id="desc">DeepGEMM plus FlashInfer and DeepSelect materialize dense scores between kernels. FusedIndexTopK keeps score production and exact Top-K in one main kernel with bounded repair.</desc>
+  <defs>
+    <style>
+      .bg{fill:#0d1117}.panel{fill:#161b22;stroke:#30363d;stroke-width:2}.box{fill:#21262d;stroke:#8b949e;stroke-width:2}.fused{fill:#123d2d;stroke:#3fb950;stroke-width:3}.repair{fill:#3b2e12;stroke:#d29922;stroke-width:2}.title{fill:#f0f6fc;font:700 23px system-ui,sans-serif}.label{fill:#f0f6fc;font:600 17px system-ui,sans-serif}.small{fill:#b1bac4;font:14px system-ui,sans-serif}.warn{fill:#f2cc60;font:600 14px system-ui,sans-serif}.arrow{stroke:#8b949e;stroke-width:3;fill:none;marker-end:url(#head)}.green{stroke:#3fb950}
+    </style>
+    <marker id="head" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#8b949e"/></marker>
+  </defs>
+  <rect class="bg" width="1200" height="520"/>
+  <text class="title" x="36" y="48">Exact Indexer Top-K execution paths</text>
+  <rect class="panel" x="30" y="78" width="1140" height="122" rx="14"/>
+  <text class="label" x="52" y="109">DeepGEMM + FlashInfer</text>
+  <rect class="box" x="260" y="105" width="205" height="62" rx="9"/>
+  <text class="label" x="289" y="133">DeepGEMM</text><text class="small" x="281" y="154">score production</text>
+  <path class="arrow" d="M465 136 H590"/>
+  <text class="warn" x="486" y="122">dense Q×N GMEM</text>
+  <rect class="box" x="590" y="105" width="220" height="62" rx="9"/>
+  <text class="label" x="640" y="133">FlashInfer</text><text class="small" x="646" y="154">exact Top-K</text>
+  <path class="arrow" d="M810 136 H970"/>
+  <text class="small" x="990" y="142">indices</text>
+  <rect class="panel" x="30" y="216" width="1140" height="122" rx="14"/>
+  <text class="label" x="52" y="247">DeepGEMM + DeepSelect</text>
+  <rect class="box" x="260" y="243" width="205" height="62" rx="9"/>
+  <text class="label" x="289" y="271">DeepGEMM</text><text class="small" x="281" y="292">score production</text>
+  <path class="arrow" d="M465 274 H590"/>
+  <text class="warn" x="486" y="260">dense Q×N GMEM</text>
+  <rect class="box" x="590" y="243" width="220" height="62" rx="9"/>
+  <text class="label" x="636" y="271">DeepSelect</text><text class="small" x="646" y="292">exact Top-K</text>
+  <path class="arrow" d="M810 274 H970"/>
+  <text class="small" x="990" y="280">indices</text>
+  <rect class="panel" x="30" y="354" width="1140" height="136" rx="14"/>
+  <text class="label" x="52" y="385">FusedIndexTopK</text>
+  <rect class="fused" x="260" y="378" width="550" height="76" rx="10"/>
+  <text class="label" x="323" y="409">Tensor-core score production + exact Top-K</text>
+  <text class="small" x="383" y="435">same kernel · CTA-local candidates</text>
+  <path class="arrow green" d="M810 416 H970"/>
+  <text class="small" x="990" y="422">indices</text>
+  <rect class="repair" x="862" y="451" width="265" height="42" rx="8"/>
+  <text class="small" x="882" y="477">flagged rows: exact device repair</text>
+</svg>

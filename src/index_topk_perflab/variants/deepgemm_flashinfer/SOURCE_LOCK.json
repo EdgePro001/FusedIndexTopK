@@ -1,9 +1,0 @@
-{
-  "name": "FlashInfer",
-  "repository": "https://github.com/flashinfer-ai/flashinfer.git",
-  "tag": "v0.6.17",
-  "commit": "a0a6b019b9b27d49d209f85d028a1ae5a9b347d7",
-  "license": "Apache-2.0",
-  "consumed_path": "include/flashinfer/topk.cuh",
-  "integration": "Header-only C++/CUDA adapter; the FlashInfer Python package is not imported."
-}

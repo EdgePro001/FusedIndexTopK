@@ -5,6 +5,7 @@ This research artifact integrates with, but does not vendor, the following
 projects:
 
 - DeepGEMM, Copyright DeepSeek contributors, MIT License.
+- DeepSelect, Copyright DeepSeek contributors, MIT License.
 - FlashInfer, Copyright FlashInfer contributors, Apache License 2.0.
 - PyTorch, Copyright PyTorch contributors, BSD-style License.
 

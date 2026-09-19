@@ -2,8 +2,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from index_topk_perflab.benchmark import BenchmarkProtocol
-from index_topk_perflab.config import load_config
+from fused_index_topk.benchmark import BenchmarkProtocol
+from fused_index_topk.config import load_config
 
 ROOT = Path(__file__).resolve().parents[1]
 

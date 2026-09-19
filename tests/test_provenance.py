@@ -3,16 +3,16 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
-from index_topk_perflab.artifacts import canonical_hash
-from index_topk_perflab.config import load_config
-from index_topk_perflab.provenance import (
+from fused_index_topk.artifacts import canonical_hash
+from fused_index_topk.config import load_config
+from fused_index_topk.provenance import (
     experiment_identity,
     framework_fingerprint,
     framework_source_manifest,
     path_fingerprint,
     variant_identity,
 )
-from index_topk_perflab.registry import load_variant
+from fused_index_topk.registry import load_variant
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -20,7 +20,7 @@ ROOT = Path(__file__).resolve().parents[1]
 def test_variant_identity_is_stable_and_cuda_lazy() -> None:
     sys.modules.pop("deep_gemm", None)
     config = load_config(ROOT / "configs" / "fused_index_topk_h20.json")
-    # Exercise core provenance without requiring the H20 FlashInfer
+    # Exercise core provenance without requiring the H20 DeepSelect
     # source checkout selected by the formal configuration.
     variant_id = "deepgemm_torch_unfused"
     options = config.variant_options(variant_id)

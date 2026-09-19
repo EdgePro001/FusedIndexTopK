@@ -6,7 +6,7 @@ import pytest
 
 torch = pytest.importorskip("torch")
 
-from index_topk_perflab.api import (  # noqa: E402
+from fused_index_topk.api import (  # noqa: E402
     ExecutionContext,
     PrefillCase,
     PrefillInputs,
@@ -16,12 +16,12 @@ from index_topk_perflab.api import (  # noqa: E402
     StageSpec,
     VariantDescriptor,
 )
-from index_topk_perflab.correctness import (  # noqa: E402
+from fused_index_topk.correctness import (  # noqa: E402
     CorrectnessError,
     build_score_threshold_oracle,
     compare_topk_indices,
 )
-from index_topk_perflab.lifecycle import CaseLifecycle  # noqa: E402
+from fused_index_topk.lifecycle import CaseLifecycle  # noqa: E402
 
 
 def _descriptor(plugin_id: str) -> VariantDescriptor:

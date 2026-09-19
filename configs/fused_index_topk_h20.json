@@ -1,7 +1,7 @@
 {
   "schema_version": 4,
-  "name": "fused_index_topk_h20_v1",
-  "seed": 20260825,
+  "name": "fused_index_topk_h20_v2",
+  "seed": 20260919,
   "target": {
     "gpu_name": "NVIDIA H20-3e",
     "compute_capability": [9, 0],
@@ -16,16 +16,20 @@
   "workload": {
     "batch_size": 1,
     "benchmark_cases": [
-      {"query_tokens": 4096, "context_tokens": 6144},
       {"query_tokens": 4096, "context_tokens": 8192},
-      {"query_tokens": 4096, "context_tokens": 12288},
-      {"query_tokens": 4096, "context_tokens": 16384}
+      {"query_tokens": 4096, "context_tokens": 16384},
+      {"query_tokens": 4096, "context_tokens": 32768},
+      {"query_tokens": 4096, "context_tokens": 65536},
+      {"query_tokens": 4096, "context_tokens": 131072},
+      {"query_tokens": 4096, "context_tokens": 163840}
     ],
     "correctness_cases": [
-      {"query_tokens": 4096, "context_tokens": 6144},
       {"query_tokens": 4096, "context_tokens": 8192},
-      {"query_tokens": 4096, "context_tokens": 12288},
-      {"query_tokens": 4096, "context_tokens": 16384}
+      {"query_tokens": 4096, "context_tokens": 16384},
+      {"query_tokens": 4096, "context_tokens": 32768},
+      {"query_tokens": 4096, "context_tokens": 65536},
+      {"query_tokens": 4096, "context_tokens": 131072},
+      {"query_tokens": 4096, "context_tokens": 163840}
     ],
     "top_k": 2048,
     "indexer_heads": 64,
@@ -56,14 +60,14 @@
   },
   "profiling": {
     "nsys_cases": [
-      {"query_tokens": 4096, "context_tokens": 6144},
-      {"query_tokens": 4096, "context_tokens": 12288},
-      {"query_tokens": 4096, "context_tokens": 16384}
+      {"query_tokens": 4096, "context_tokens": 16384},
+      {"query_tokens": 4096, "context_tokens": 65536},
+      {"query_tokens": 4096, "context_tokens": 163840}
     ],
     "ncu_cases": [
-      {"query_tokens": 4096, "context_tokens": 6144},
-      {"query_tokens": 4096, "context_tokens": 12288},
-      {"query_tokens": 4096, "context_tokens": 16384}
+      {"query_tokens": 4096, "context_tokens": 16384},
+      {"query_tokens": 4096, "context_tokens": 65536},
+      {"query_tokens": 4096, "context_tokens": 163840}
     ],
     "captured_iterations": 1,
     "ncu_metrics": [
@@ -85,18 +89,18 @@
     ]
   },
   "exact_reference_variant": "deepgemm_torch_unfused",
-  "baseline_variant": "deepgemm_flashinfer_topk_auto",
+  "baseline_variant": "deepgemm_deepselect_topk",
   "variants": {
     "deepgemm_torch_unfused": {
-      "factory": "index_topk_perflab.variants.deepgemm_torch:create_variant",
+      "factory": "fused_index_topk.variants.deepgemm_torch:create_variant",
       "options": {"sorted": false}
     },
-    "deepgemm_flashinfer_topk_auto": {
-      "factory": "index_topk_perflab.variants.deepgemm_flashinfer.plugin:create_auto_variant",
+    "deepgemm_deepselect_topk": {
+      "factory": "fused_index_topk.variants.deepgemm_deepselect.plugin:create_variant",
       "options": {"verbose_build": false}
     },
     "fused_index_topk": {
-      "factory": "index_topk_perflab.experimental.fused_index_topk.plugin:create_variant",
+      "factory": "fused_index_topk.kernel.plugin:create_variant",
       "options": {"verbose_build": false}
     }
   }

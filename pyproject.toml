@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "fused-index-topk"
-version = "0.1.0"
+version = "0.2.0"
 description = "DeepGEMM-style fused Indexer and exact Top-K kernels for DeepSeek V3.2 sparse attention"
 readme = "README.md"
 license = "MIT"
@@ -21,16 +21,15 @@ classifiers = [
 ]
 
 [project.scripts]
-fused-index-topk = "index_topk_perflab.cli:main"
-itk-perflab = "index_topk_perflab.cli:main"
+fused-index-topk = "fused_index_topk.cli:main"
 
 [project.optional-dependencies]
 test = ["pytest>=7", "ruff>=0.12"]
 
-[project.entry-points."index_topk_perflab.variants"]
-deepgemm_torch_unfused = "index_topk_perflab.variants.deepgemm_torch:create_variant"
-deepgemm_flashinfer_topk_auto = "index_topk_perflab.variants.deepgemm_flashinfer.plugin:create_auto_variant"
-fused_index_topk = "index_topk_perflab.experimental.fused_index_topk.plugin:create_variant"
+[project.entry-points."fused_index_topk.variants"]
+deepgemm_torch_unfused = "fused_index_topk.variants.deepgemm_torch:create_variant"
+deepgemm_deepselect_topk = "fused_index_topk.variants.deepgemm_deepselect.plugin:create_variant"
+fused_index_topk = "fused_index_topk.kernel.plugin:create_variant"
 
 [tool.setuptools]
 package-dir = {"" = "src"}
@@ -39,11 +38,11 @@ package-dir = {"" = "src"}
 where = ["src"]
 
 [tool.setuptools.package-data]
-index_topk_perflab = [
-  "experimental/**/*.cpp",
-  "experimental/**/*.cu",
-  "experimental/**/*.cuh",
-  "experimental/**/*.hpp",
+fused_index_topk = [
+  "kernel/**/*.cpp",
+  "kernel/**/*.cu",
+  "kernel/**/*.cuh",
+  "kernel/**/*.hpp",
   "variants/**/*.cu",
   "variants/**/*.json",
 ]

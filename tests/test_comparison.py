@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from index_topk_perflab.artifacts import canonical_hash
-from index_topk_perflab.comparison import compare_benchmarks
+from fused_index_topk.artifacts import canonical_hash
+from fused_index_topk.comparison import compare_benchmarks
 
 
 def _artifact(variant: str, latency: float, *, contract: str = "same") -> dict[str, object]:

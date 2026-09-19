@@ -12,15 +12,15 @@ from pathlib import Path
 from types import SimpleNamespace
 from typing import Any
 
-from index_topk_perflab.api import RunMode
-from index_topk_perflab.artifacts import canonical_hash, write_json_atomic
-from index_topk_perflab.benchmark import BenchmarkProtocol, benchmark_prepared_graph
-from index_topk_perflab.config import load_config
-from index_topk_perflab.lifecycle import CaseLifecycle
-from index_topk_perflab.provenance import framework_fingerprint
-from index_topk_perflab.registry import load_variant
-from index_topk_perflab.replay import ReplayInputFactory, sha256_file
-from index_topk_perflab.runtime import (
+from fused_index_topk.api import RunMode
+from fused_index_topk.artifacts import canonical_hash, write_json_atomic
+from fused_index_topk.benchmark import BenchmarkProtocol, benchmark_prepared_graph
+from fused_index_topk.config import load_config
+from fused_index_topk.lifecycle import CaseLifecycle
+from fused_index_topk.provenance import framework_fingerprint
+from fused_index_topk.registry import load_variant
+from fused_index_topk.replay import ReplayInputFactory, sha256_file
+from fused_index_topk.runtime import (
     collect_gpu_state,
     collect_runtime,
     runtime_identity,
@@ -30,15 +30,15 @@ from index_topk_perflab.runtime import (
 
 VARIANTS = {
     "torch": (
-        "index_topk_perflab.variants.deepgemm_torch:create_variant",
+        "fused_index_topk.variants.deepgemm_torch:create_variant",
         {"sorted": False},
     ),
-    "flashinfer": (
-        "index_topk_perflab.variants.deepgemm_flashinfer.plugin:create_auto_variant",
+    "deepselect": (
+        "fused_index_topk.variants.deepgemm_deepselect.plugin:create_variant",
         {"verbose_build": False},
     ),
     "fused": (
-        "index_topk_perflab.experimental.fused_index_topk.plugin:create_variant",
+        "fused_index_topk.kernel.plugin:create_variant",
         {"verbose_build": False},
     ),
 }
@@ -94,7 +94,7 @@ def main() -> None:
     parser.add_argument("--manifest", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--splits", nargs="+", default=["test_normal", "test_hard"])
-    parser.add_argument("--variants", nargs="+", default=["flashinfer", "fused"])
+    parser.add_argument("--variants", nargs="+", default=["deepselect", "fused"])
     parser.add_argument("--contexts", type=int, nargs="+", default=[])
     parser.add_argument("--warmup-iterations", type=int, default=10)
     parser.add_argument("--event-trials", type=int, default=20)
@@ -149,11 +149,11 @@ def main() -> None:
         for case in cases:
             for variant_name in args.variants:
                 reference = load_variant(
-                    "index_topk_perflab.variants.deepgemm_torch:create_variant",
+                    "fused_index_topk.variants.deepgemm_torch:create_variant",
                     options=reference_options,
                 )
                 reference_factory = (
-                    "index_topk_perflab.variants.deepgemm_torch:create_variant"
+                    "fused_index_topk.variants.deepgemm_torch:create_variant"
                 )
                 factory_reference, options = VARIANTS[variant_name]
                 candidate = load_variant(factory_reference, options=options)

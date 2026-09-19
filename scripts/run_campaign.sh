@@ -9,7 +9,8 @@ candidate=""
 run_id=""
 baseline_correctness=""
 candidate_correctness=""
-output_root="${ITK_ARTIFACT_ROOT:-/data/${USER:?USER is not set}/artifacts}/campaigns"
+runtime_root="${ITK_RUNTIME_ROOT:-${XDG_CACHE_HOME:-${HOME:?HOME is not set}/.cache}/fused-index-topk}"
+output_root="${ITK_ARTIFACT_ROOT:-${runtime_root}/artifacts}/campaigns"
 
 usage() {
     echo "usage: scripts/run_campaign.sh --candidate ID --run-id ID --baseline-correctness PATH --candidate-correctness PATH [--config PATH] [--output-root PATH]" >&2
@@ -46,7 +47,7 @@ done
 campaign_root="${output_root}/${run_id}"
 plan="${campaign_root}/plan.json"
 sealed="${campaign_root}/campaign.json"
-PYTHONPATH=src python3 -m index_topk_perflab.cli campaign-plan \
+PYTHONPATH=src python3 -m fused_index_topk.cli campaign-plan \
     --config "${config}" \
     --candidate "${candidate}" \
     --run-id "${run_id}" \
@@ -66,7 +67,7 @@ while IFS=$'\t' read -r run_index run_count arm variant slot_run_id artifact_pat
         --config "${config}" \
         --artifact "${artifact_path}" \
         -- \
-        scripts/run_h20.sh python -m index_topk_perflab.cli bench \
+        scripts/run_h20.sh python -m fused_index_topk.cli bench \
             --config "${config}" \
             --variant "${variant}" \
             --run-id "${slot_run_id}" \
@@ -74,7 +75,7 @@ while IFS=$'\t' read -r run_index run_count arm variant slot_run_id artifact_pat
             --output "${artifact_path}"
 done < <(python3 -c 'import json,sys; p=json.load(open(sys.argv[1], encoding="utf-8")); [print(i, len(p["runs"]), r["arm"], r["variant"], r["run_id"], r["artifact_path"], sep="\t") for i,r in enumerate(p["runs"], 1)]' "${plan}")
 
-PYTHONPATH=src python3 -m index_topk_perflab.cli campaign-seal \
+PYTHONPATH=src python3 -m fused_index_topk.cli campaign-seal \
     --plan "${plan}" \
     --output "${sealed}"
 

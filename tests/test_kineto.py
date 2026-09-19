@@ -4,7 +4,7 @@ from dataclasses import dataclass, field
 
 import pytest
 
-from index_topk_perflab.kineto import (
+from fused_index_topk.kineto import (
     extract_active_trials,
     extract_range_timing,
     operator_range_name,

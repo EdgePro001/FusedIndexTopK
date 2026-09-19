@@ -9,7 +9,8 @@ candidate=""
 baseline=""
 run_id="h20-eval-$(date -u +%Y%m%dT%H%M%SZ)"
 mode="screening"
-artifact_root="${ITK_ARTIFACT_ROOT:-/data/${USER:?USER is not set}/artifacts}"
+runtime_root="${ITK_RUNTIME_ROOT:-${XDG_CACHE_HOME:-${HOME:?HOME is not set}/.cache}/fused-index-topk}"
+artifact_root="${ITK_ARTIFACT_ROOT:-${runtime_root}/artifacts}"
 
 usage() {
     cat >&2 <<'EOF'
@@ -23,7 +24,7 @@ Options:
   --run-id ID           safe, unique artifact prefix
   --config PATH         default: configs/fused_index_topk_h20.json
   --baseline ID         default: baseline_variant from config
-  --artifact-root PATH  default: /data/$USER/artifacts
+  --artifact-root PATH  default: the per-user FusedIndexTopK cache
 
 screening runs two independent correctness gates, one baseline matrix, one
 candidate matrix, and a diagnostic comparison. formal runs the correctness
@@ -89,7 +90,7 @@ python3 scripts/live_progress.py \
     --label "correctness baseline" \
     --artifact "${baseline_correctness}" \
     -- \
-    scripts/run_h20.sh python -m index_topk_perflab.cli check \
+    scripts/run_h20.sh python -m fused_index_topk.cli check \
         --config "${config}" \
         --variant "${baseline}" \
         --run-id "${baseline_check_run}" \
@@ -100,7 +101,7 @@ python3 scripts/live_progress.py \
     --label "correctness candidate" \
     --artifact "${candidate_correctness}" \
     -- \
-    scripts/run_h20.sh python -m index_topk_perflab.cli check \
+    scripts/run_h20.sh python -m fused_index_topk.cli check \
         --config "${config}" \
         --variant "${candidate}" \
         --run-id "${candidate_check_run}" \
@@ -130,7 +131,7 @@ python3 scripts/live_progress.py \
     --config "${config}" \
     --artifact "${baseline_benchmark}" \
     -- \
-    scripts/run_h20.sh python -m index_topk_perflab.cli bench \
+    scripts/run_h20.sh python -m fused_index_topk.cli bench \
         --config "${config}" \
         --variant "${baseline}" \
         --run-id "${baseline_bench_run}" \
@@ -143,14 +144,14 @@ python3 scripts/live_progress.py \
     --config "${config}" \
     --artifact "${candidate_benchmark}" \
     -- \
-    scripts/run_h20.sh python -m index_topk_perflab.cli bench \
+    scripts/run_h20.sh python -m fused_index_topk.cli bench \
         --config "${config}" \
         --variant "${candidate}" \
         --run-id "${candidate_bench_run}" \
         --correctness "${candidate_correctness}" \
         --output "${candidate_benchmark}"
 
-scripts/run_h20.sh python -m index_topk_perflab.cli compare \
+scripts/run_h20.sh python -m fused_index_topk.cli compare \
     --baseline "${baseline_benchmark}" \
     --candidate "${candidate_benchmark}" \
     --output "${comparison}"

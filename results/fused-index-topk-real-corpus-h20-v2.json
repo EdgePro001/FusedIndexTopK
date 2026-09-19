@@ -1,0 +1,372 @@
+{
+  "schema_version": 1,
+  "artifact": "fused-index-topk-real-corpus-h20-v2",
+  "status": "complete",
+  "measured_on": "2026-09-19",
+  "hardware": {
+    "gpu": "NVIDIA H20-3e",
+    "compute_capability": "9.0",
+    "sm_count": 78
+  },
+  "workload": {
+    "query_tokens": 4096,
+    "top_k": 2048,
+    "context_tokens": [
+      8192,
+      16384,
+      32768,
+      65536,
+      131072,
+      163840
+    ],
+    "layers": [
+      0,
+      15,
+      30,
+      45,
+      60
+    ],
+    "splits": [
+      "test_normal",
+      "test_hard"
+    ],
+    "fixtures_per_split": 2
+  },
+  "corpus": {
+    "kind": "native-length contextual model captures from held-out real text",
+    "source_documents": 1032,
+    "prompts": 24,
+    "token_manifest_sha256": "011378bbb6ed90e8ba1850506bc8c59fea42e6f50750f236ab0ddfc3d723d0db",
+    "capture_manifest_sha256": "d22ceb2887b7a2197e59bcd13f44c2a0326c764198e7be29fbe79bdcb1cfae1b",
+    "tensors_redistributed": false
+  },
+  "implementations": {
+    "baseline": {
+      "name": "DeepGEMM + DeepSelect",
+      "deepgemm_commit": "7c95b14aa4a66edd7b682e5acdde62351ca81197",
+      "deepselect_commit": "0f03b68748b304863fdf0181a11458d04ae533a9"
+    },
+    "candidate": {
+      "name": "FusedIndexTopK",
+      "implementation_version": "2.0.0"
+    }
+  },
+  "protocol": {
+    "paired_same_input_same_gpu": true,
+    "hot_trials_per_case": 12,
+    "calls_per_trial": 4,
+    "cupti_trials_per_case": 3,
+    "includes_sampling_and_device_repair": true,
+    "excludes_jit_input_preparation_and_correctness": true
+  },
+  "correctness": {
+    "cases_checked": 120,
+    "cases_passed": 120,
+    "exact_topk": true,
+    "unresolved_repair_rows": 0
+  },
+  "by_context": {
+    "131072": {
+      "cases": 20,
+      "baseline_hot_mean_ms": 33.84817981719971,
+      "fused_hot_mean_ms": 32.47021474838257,
+      "paired_delta_hot_mean_pct": -4.071154100190667,
+      "paired_delta_hot_median_pct": -4.4339980379367985,
+      "paired_delta_hot_min_pct": -5.101595614335008,
+      "paired_delta_hot_max_pct": -0.6598537375955726,
+      "wins": 20,
+      "fast_failure_rows": 3,
+      "by_split": {
+        "test_hard": {
+          "cases": 10,
+          "paired_delta_hot_mean_pct": -4.176111146926788,
+          "wins": 10
+        },
+        "test_normal": {
+          "cases": 10,
+          "paired_delta_hot_mean_pct": -3.9661970534545476,
+          "wins": 10
+        }
+      }
+    },
+    "16384": {
+      "cases": 20,
+      "baseline_hot_mean_ms": 4.2548248171806335,
+      "fused_hot_mean_ms": 3.7987104058265686,
+      "paired_delta_hot_mean_pct": -10.721890483495233,
+      "paired_delta_hot_median_pct": -11.29617275453786,
+      "paired_delta_hot_min_pct": -12.034828906394102,
+      "paired_delta_hot_max_pct": -6.759103660367249,
+      "wins": 20,
+      "fast_failure_rows": 73,
+      "by_split": {
+        "test_hard": {
+          "cases": 10,
+          "paired_delta_hot_mean_pct": -10.081233530105662,
+          "wins": 10
+        },
+        "test_normal": {
+          "cases": 10,
+          "paired_delta_hot_mean_pct": -11.362547436884805,
+          "wins": 10
+        }
+      }
+    },
+    "163840": {
+      "cases": 20,
+      "baseline_hot_mean_ms": 41.99850797653198,
+      "fused_hot_mean_ms": 40.53123540878296,
+      "paired_delta_hot_mean_pct": -3.492084339089927,
+      "paired_delta_hot_median_pct": -3.5326483906147566,
+      "paired_delta_hot_min_pct": -4.09997987423858,
+      "paired_delta_hot_max_pct": -2.777452210975895,
+      "wins": 20,
+      "fast_failure_rows": 0,
+      "by_split": {
+        "test_hard": {
+          "cases": 10,
+          "paired_delta_hot_mean_pct": -3.50107916536728,
+          "wins": 10
+        },
+        "test_normal": {
+          "cases": 10,
+          "paired_delta_hot_mean_pct": -3.483089512812574,
+          "wins": 10
+        }
+      }
+    },
+    "32768": {
+      "cases": 20,
+      "baseline_hot_mean_ms": 8.689232563972473,
+      "fused_hot_mean_ms": 7.880661988258362,
+      "paired_delta_hot_mean_pct": -9.304385939868164,
+      "paired_delta_hot_median_pct": -9.232012458118733,
+      "paired_delta_hot_min_pct": -9.825862098046578,
+      "paired_delta_hot_max_pct": -8.702987519399697,
+      "wins": 20,
+      "fast_failure_rows": 0,
+      "by_split": {
+        "test_hard": {
+          "cases": 10,
+          "paired_delta_hot_mean_pct": -9.40084389054052,
+          "wins": 10
+        },
+        "test_normal": {
+          "cases": 10,
+          "paired_delta_hot_mean_pct": -9.207927989195806,
+          "wins": 10
+        }
+      }
+    },
+    "65536": {
+      "cases": 20,
+      "baseline_hot_mean_ms": 17.17351140975952,
+      "fused_hot_mean_ms": 16.08426728248596,
+      "paired_delta_hot_mean_pct": -6.340708269857279,
+      "paired_delta_hot_median_pct": -6.422199237401216,
+      "paired_delta_hot_min_pct": -6.954745717495769,
+      "paired_delta_hot_max_pct": -5.457299751710465,
+      "wins": 20,
+      "fast_failure_rows": 0,
+      "by_split": {
+        "test_hard": {
+          "cases": 10,
+          "paired_delta_hot_mean_pct": -6.414161001362354,
+          "wins": 10
+        },
+        "test_normal": {
+          "cases": 10,
+          "paired_delta_hot_mean_pct": -6.267255538352204,
+          "wins": 10
+        }
+      }
+    },
+    "8192": {
+      "cases": 20,
+      "baseline_hot_mean_ms": 1.8695848017930985,
+      "fused_hot_mean_ms": 1.9492696136236192,
+      "paired_delta_hot_mean_pct": 4.262858349096877,
+      "paired_delta_hot_median_pct": 4.246209794103562,
+      "paired_delta_hot_min_pct": 3.5079551212689353,
+      "paired_delta_hot_max_pct": 4.792100969854185,
+      "wins": 0,
+      "fast_failure_rows": 0,
+      "by_split": {
+        "test_hard": {
+          "cases": 10,
+          "paired_delta_hot_mean_pct": 4.153853842705302,
+          "wins": 0
+        },
+        "test_normal": {
+          "cases": 10,
+          "paired_delta_hot_mean_pct": 4.3718628554884535,
+          "wins": 0
+        }
+      }
+    }
+  },
+  "by_context_and_layer": {
+    "131072": {
+      "0": {
+        "paired_delta_hot_mean_pct": -4.6699007552568785,
+        "wins": 4,
+        "fast_failure_rows": 0
+      },
+      "15": {
+        "paired_delta_hot_mean_pct": -3.9794584253600633,
+        "wins": 4,
+        "fast_failure_rows": 0
+      },
+      "30": {
+        "paired_delta_hot_mean_pct": -4.4182791282903615,
+        "wins": 4,
+        "fast_failure_rows": 0
+      },
+      "45": {
+        "paired_delta_hot_mean_pct": -2.671091837499554,
+        "wins": 4,
+        "fast_failure_rows": 3
+      },
+      "60": {
+        "paired_delta_hot_mean_pct": -4.617040354546481,
+        "wins": 4,
+        "fast_failure_rows": 0
+      }
+    },
+    "16384": {
+      "0": {
+        "paired_delta_hot_mean_pct": -11.658377625698824,
+        "wins": 4,
+        "fast_failure_rows": 0
+      },
+      "15": {
+        "paired_delta_hot_mean_pct": -11.047390794526047,
+        "wins": 4,
+        "fast_failure_rows": 0
+      },
+      "30": {
+        "paired_delta_hot_mean_pct": -10.197004481270259,
+        "wins": 4,
+        "fast_failure_rows": 61
+      },
+      "45": {
+        "paired_delta_hot_mean_pct": -10.287864708415384,
+        "wins": 4,
+        "fast_failure_rows": 3
+      },
+      "60": {
+        "paired_delta_hot_mean_pct": -10.418814807565653,
+        "wins": 4,
+        "fast_failure_rows": 9
+      }
+    },
+    "163840": {
+      "0": {
+        "paired_delta_hot_mean_pct": -3.9586618843013373,
+        "wins": 4,
+        "fast_failure_rows": 0
+      },
+      "15": {
+        "paired_delta_hot_mean_pct": -2.8690397474790936,
+        "wins": 4,
+        "fast_failure_rows": 0
+      },
+      "30": {
+        "paired_delta_hot_mean_pct": -3.364840447899986,
+        "wins": 4,
+        "fast_failure_rows": 0
+      },
+      "45": {
+        "paired_delta_hot_mean_pct": -3.682603040470986,
+        "wins": 4,
+        "fast_failure_rows": 0
+      },
+      "60": {
+        "paired_delta_hot_mean_pct": -3.5852765752982325,
+        "wins": 4,
+        "fast_failure_rows": 0
+      }
+    },
+    "32768": {
+      "0": {
+        "paired_delta_hot_mean_pct": -9.657414987105811,
+        "wins": 4,
+        "fast_failure_rows": 0
+      },
+      "15": {
+        "paired_delta_hot_mean_pct": -8.906605836148998,
+        "wins": 4,
+        "fast_failure_rows": 0
+      },
+      "30": {
+        "paired_delta_hot_mean_pct": -9.31890783518389,
+        "wins": 4,
+        "fast_failure_rows": 0
+      },
+      "45": {
+        "paired_delta_hot_mean_pct": -9.536132260751202,
+        "wins": 4,
+        "fast_failure_rows": 0
+      },
+      "60": {
+        "paired_delta_hot_mean_pct": -9.102868780150914,
+        "wins": 4,
+        "fast_failure_rows": 0
+      }
+    },
+    "65536": {
+      "0": {
+        "paired_delta_hot_mean_pct": -6.623702420150352,
+        "wins": 4,
+        "fast_failure_rows": 0
+      },
+      "15": {
+        "paired_delta_hot_mean_pct": -5.668283675649572,
+        "wins": 4,
+        "fast_failure_rows": 0
+      },
+      "30": {
+        "paired_delta_hot_mean_pct": -6.495907784026891,
+        "wins": 4,
+        "fast_failure_rows": 0
+      },
+      "45": {
+        "paired_delta_hot_mean_pct": -6.457789341265974,
+        "wins": 4,
+        "fast_failure_rows": 0
+      },
+      "60": {
+        "paired_delta_hot_mean_pct": -6.4578581281936085,
+        "wins": 4,
+        "fast_failure_rows": 0
+      }
+    },
+    "8192": {
+      "0": {
+        "paired_delta_hot_mean_pct": 4.71017378934579,
+        "wins": 0,
+        "fast_failure_rows": 0
+      },
+      "15": {
+        "paired_delta_hot_mean_pct": 4.192008957729931,
+        "wins": 0,
+        "fast_failure_rows": 0
+      },
+      "30": {
+        "paired_delta_hot_mean_pct": 4.104396909649616,
+        "wins": 0,
+        "fast_failure_rows": 0
+      },
+      "45": {
+        "paired_delta_hot_mean_pct": 4.2781850620279505,
+        "wins": 0,
+        "fast_failure_rows": 0
+      },
+      "60": {
+        "paired_delta_hot_mean_pct": 4.0295270267311,
+        "wins": 0,
+        "fast_failure_rows": 0
+      }
+    }
+  }
+}

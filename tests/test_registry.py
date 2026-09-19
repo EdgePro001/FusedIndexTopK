@@ -5,8 +5,8 @@ import types
 
 import pytest
 
-from index_topk_perflab.api import VariantDescriptor
-from index_topk_perflab.registry import available_variants, load_variant
+from fused_index_topk.api import VariantDescriptor
+from fused_index_topk.registry import available_variants, load_variant
 
 
 def test_builtin_baseline_load_is_cuda_lazy() -> None:
@@ -59,6 +59,6 @@ def test_unknown_variant_error_lists_available_names() -> None:
 def test_available_variants_contains_baseline() -> None:
     variants = available_variants()
     assert variants["deepgemm_torch_unfused"].endswith(":create_variant")
-    assert variants["deepgemm_flashinfer_topk_auto"].endswith(":create_auto_variant")
+    assert variants["deepgemm_deepselect_topk"].endswith(":create_variant")
     assert variants["fused_index_topk"].endswith(":create_variant")
     assert "deepgemm_raft_select_k_auto" not in variants

@@ -2,12 +2,12 @@
 set -euo pipefail
 
 project_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-runtime_root="${ITK_RUNTIME_ROOT:-/data/${USER:?USER is not set}}"
+runtime_root="${ITK_RUNTIME_ROOT:-${XDG_CACHE_HOME:-${HOME:?HOME is not set}/.cache}/fused-index-topk}"
 venv="${runtime_root}/runtime/venv"
 torch_lib="${venv}/lib/python3.12/site-packages/torch/lib"
 cuda_home="${CUDA_HOME:-/usr/local/cuda-13.0}"
 deepgemm_source="${runtime_root}/src/DeepGEMM-exact"
-flashinfer_source="${runtime_root}/src/flashinfer-v0.6.17"
+deepselect_source="${runtime_root}/src/DeepSelect-exact"
 python_dev_include="${runtime_root}/runtime/python3.12-dev/root/usr/include"
 
 if [[ "$#" -eq 0 ]]; then
@@ -26,8 +26,8 @@ if [[ ! -d "${deepgemm_source}/.git" ]]; then
     echo "missing exact DeepGEMM checkout: ${deepgemm_source}" >&2
     exit 1
 fi
-if [[ ! -d "${flashinfer_source}/.git" ]]; then
-    echo "missing exact FlashInfer checkout: ${flashinfer_source}" >&2
+if [[ ! -d "${deepselect_source}/.git" ]]; then
+    echo "missing exact DeepSelect checkout: ${deepselect_source}" >&2
     exit 1
 fi
 if [[ ! -f "${python_dev_include}/python3.12/Python.h" ]]; then
@@ -58,7 +58,7 @@ if [[ -z "${cache_key}" ]]; then
             cd "${project_root}"
             env \
                 PYTHONPATH="${project_root}/src" \
-                FLASHINFER_SOURCE="${flashinfer_source}" \
+                DEEPSELECT_SOURCE="${deepselect_source}" \
                 "${venv}/bin/python" scripts/nvtx_label.py \
                     --config "${requested_config}" \
                     --variant "${requested_variant}" \
@@ -77,7 +77,7 @@ if [[ ! "${cache_key}" =~ ^[a-zA-Z0-9][a-zA-Z0-9_.-]{0,127}$ ]]; then
     exit 2
 fi
 
-cache_root="${runtime_root}/runtime/index-topk-perflab-cache/${cache_key}"
+cache_root="${runtime_root}/runtime/cache/${cache_key}"
 mkdir -p \
     "${cache_root}/deep-gemm" \
     "${cache_root}/torch-extensions" \
@@ -95,7 +95,7 @@ exec env \
     CPATH="${python_dev_include}/python3.12:${python_dev_include}" \
     TORCH_CUDA_ARCH_LIST="9.0a" \
     DEEPGEMM_SOURCE="${deepgemm_source}" \
-    FLASHINFER_SOURCE="${flashinfer_source}" \
+    DEEPSELECT_SOURCE="${deepselect_source}" \
     DG_JIT_NVCC_COMPILER="${cuda_home}/bin/nvcc" \
     DG_JIT_USE_NVRTC=0 \
     DG_JIT_CACHE_DIR="${cache_root}/deep-gemm" \

@@ -8,11 +8,11 @@ import json
 from pathlib import Path
 from typing import Any
 
-from index_topk_perflab.api import PrefillCase, RunMode
-from index_topk_perflab.artifacts import write_json_atomic
-from index_topk_perflab.experimental.fused_index_topk.plugin import create_variant
-from index_topk_perflab.inputs import make_prefill_inputs
-from index_topk_perflab.replay import ReplayInputFactory
+from fused_index_topk.api import PrefillCase, RunMode
+from fused_index_topk.artifacts import write_json_atomic
+from fused_index_topk.inputs import make_prefill_inputs
+from fused_index_topk.kernel.plugin import create_variant
+from fused_index_topk.replay import ReplayInputFactory
 
 
 def main() -> None:
@@ -80,13 +80,13 @@ def main() -> None:
     artifacts: dict[str, Any] = dict(graph.initial_artifacts)
     fast_failure_flags = None
     for node in graph.nodes:
-        if node.spec.stage_id == "candidate_producer" and args.force_underflow_rows:
+        if node.spec.stage_id == "fused_topk" and args.force_underflow_rows:
             force_end = args.force_underflow_start + args.force_underflow_rows
             if not 0 <= args.force_underflow_start < force_end <= case.query_tokens:
                 raise ValueError("forced underflow range lies outside query rows")
             artifacts["thresholds"][args.force_underflow_start : force_end].fill_(torch.inf)
         node.run(None, artifacts)
-        if node.spec.stage_id == "candidate_reducer":
+        if node.spec.stage_id == "fused_topk":
             torch.cuda.synchronize()
             fast_failure_flags = artifacts["fast_failure_flags"].clone()
 

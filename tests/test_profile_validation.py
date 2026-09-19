@@ -4,7 +4,7 @@ import csv
 
 import pytest
 
-from index_topk_perflab.profile_validation import validate_ncu_csv, validate_nsys_stats
+from fused_index_topk.profile_validation import validate_ncu_csv, validate_nsys_stats
 
 
 def test_validate_ncu_csv_requires_all_requested_metrics(tmp_path) -> None:

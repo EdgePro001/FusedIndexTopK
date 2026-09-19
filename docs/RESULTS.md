@@ -1,55 +1,44 @@
 # Results
 
-## Short-context gold qualification
+## Release result
 
-FusedIndexTopK won all 40 held-out cells against DeepGEMM + FlashInfer under both CUPTI
-kernel-sum timing and whole-pipeline CUDA Events.
+FusedIndexTopK 2.0.0 passed all 120 exactness checks in the real-corpus H20
+campaign. Against the pinned DeepGEMM + DeepSelect baseline, it won every
+measured case from 16K through 160K context.
 
-| Aggregate metric | CUPTI | CUDA Event |
-|---|---:|---:|
-| Winning cells | 40/40 | 40/40 |
-| Median latency reduction vs FlashInfer | 14.713% | 14.867% |
-| Bootstrap 95% interval | 13.185%–15.943% | 13.292%–16.092% |
-| Median reduction vs PyTorch | 30.133% | 30.586% |
+| Context | Cases | Baseline mean | Fused mean | Paired mean change | Wins |
+|---:|---:|---:|---:|---:|---:|
+| 8,192 | 20 | 1.870 ms | 1.949 ms | +4.26% | 0 |
+| 16,384 | 20 | 4.255 ms | 3.799 ms | -10.72% | 20 |
+| 32,768 | 20 | 8.689 ms | 7.881 ms | -9.30% | 20 |
+| 65,536 | 20 | 17.174 ms | 16.084 ms | -6.34% | 20 |
+| 131,072 | 20 | 33.848 ms | 32.470 ms | -4.07% | 20 |
+| 163,840 | 20 | 41.999 ms | 40.531 ms | -3.49% | 20 |
 
-Across individual cells, CUPTI reductions versus FlashInfer ranged from 11.592%
-to 19.366%. The largest observed range among the three independent block
-medians was 1.230%, below the predeclared 5% stability gate.
+A negative change means FusedIndexTopK is faster. The campaign includes
+sampling and device repair in both timing and correctness.
 
-The compact per-cell table is in
-[`results/fused-index-topk-short-context-h20-v1.csv`](../results/fused-index-topk-short-context-h20-v1.csv).
+## Stability across layers
 
-## Long-context development qualification
+At every context length from 16K to 160K, all four inputs at each sampled layer
+won. The weakest winning layer/context cell was still faster than the paired
+baseline. At 8K, all layer cells were slower, which establishes a clear
+dispatch boundary rather than a universal speed claim.
 
-| N | Split | FlashInfer CUPTI ms | FusedIndexTopK CUPTI ms | Reduction |
-|---:|---|---:|---:|---:|
-| 32,768 | normal | 8.630 | 7.978 | 7.55% |
-| 32,768 | hard | 8.620 | 7.950 | 7.77% |
-| 65,536 | normal | 17.153 | 16.176 | 5.70% |
-| 65,536 | hard | 17.125 | 16.173 | 5.56% |
-| 131,072 | normal | 34.023 | 32.368 | 4.87% |
-| 131,072 | hard | 34.054 | 32.125 | 5.66% |
+## Repair observations
 
-All listed measurements include the empty device-masked repair launches. Forced
-all-row repair was exact at 32K, 64K, 128K, 160K, and a 40K partial-tail case;
-memcheck reported zero errors and racecheck reported zero hazards after the
-recorded synchronization fix.
+The fast path flagged 73 rows at 16K and 3 rows at 128K across the complete
+campaign. All other context lengths had zero flagged rows. Every flagged row
+was repaired exactly and the final unresolved-repair count was zero.
 
-This is not yet equivalent to the five-layer, three-block gold campaign. The
-long-context numbers cover layer 0 and two held-out splits, so the status remains
-development qualification.
-
-Machine-readable evidence is in
-[`results/fused-index-topk-long-context-h20-v1.json`](../results/fused-index-topk-long-context-h20-v1.json).
-
-The independently assembled clean public snapshot was also exercised on H20:
-all 130 tests passed, an N=16K short-path exactness smoke passed, and an N=32K
-forced one-row underflow was repaired across two chunks with zero mismatches or
-unresolved flags. The compact record is
-[`results/fused-index-topk-smoke-h20-v1.json`](../results/fused-index-topk-smoke-h20-v1.json).
+A fast-path flag is not an incorrect output. It means the conservative device
+guard selected the exact repair path for that row.
 
 ## Claim boundary
 
-The qualified claim is specific to the published shape, software stack, timing
-protocol, and replay distribution. It does not imply that FusedIndexTopK wins on all
-Top-K shapes, GPUs, score distributions, or worst-case repair patterns.
+The reported values are paired operator latencies on NVIDIA H20-3e. They are
+not whole-model measurements and do not establish TTFT, TPOT, TPS, energy, or
+multi-GPU scaling. Those claims require an end-to-end serving experiment.
+
+Machine-readable data and hashes are in
+[fused-index-topk-real-corpus-h20-v2.json](../results/fused-index-topk-real-corpus-h20-v2.json).

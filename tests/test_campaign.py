@@ -5,15 +5,15 @@ from pathlib import Path
 
 import pytest
 
-from index_topk_perflab.artifacts import canonical_hash, write_json_atomic
-from index_topk_perflab.campaign import (
+from fused_index_topk.artifacts import canonical_hash, write_json_atomic
+from fused_index_topk.campaign import (
     build_campaign_plan,
     seal_campaign,
     write_campaign_plan,
 )
-from index_topk_perflab.config import load_config
-from index_topk_perflab.runner import file_sha256
-from index_topk_perflab.summary import summarize_measurements
+from fused_index_topk.config import load_config
+from fused_index_topk.runner import file_sha256
+from fused_index_topk.summary import summarize_measurements
 
 ROOT = Path(__file__).resolve().parents[1]
 

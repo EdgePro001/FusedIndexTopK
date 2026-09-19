@@ -1,0 +1,8 @@
+{
+  "repository": "https://github.com/deepseek-ai/DeepSelect.git",
+  "commit": "0f03b68748b304863fdf0181a11458d04ae533a9",
+  "upstream_version": "1.0.0",
+  "upstream_cuda_targets": ["sm100a", "sm103a"],
+  "local_build_target": "sm90a",
+  "adaptation": "Unmodified upstream FP32 kernel headers, instantiated for SM90a by a project-local PyTorch binding"
+}

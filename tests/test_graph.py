@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import pytest
 
-from index_topk_perflab.api import (
+from fused_index_topk.api import (
     ExecutionContext,
     PrefillCase,
     PreparedGraph,
@@ -11,7 +11,7 @@ from index_topk_perflab.api import (
     StageSpec,
     VariantDescriptor,
 )
-from index_topk_perflab.graph import (
+from fused_index_topk.graph import (
     execute_graph,
     graph_fingerprint,
     topological_nodes,

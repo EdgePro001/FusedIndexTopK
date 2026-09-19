@@ -4,8 +4,8 @@ from pathlib import Path
 
 import pytest
 
-from index_topk_perflab.config import load_config
-from index_topk_perflab.runtime import (
+from fused_index_topk.config import load_config
+from fused_index_topk.runtime import (
     runtime_identity,
     validate_gpu_exclusivity,
     validate_runtime,

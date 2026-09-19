@@ -10,7 +10,8 @@ target_length=""
 run_id=""
 replicate="1"
 correctness=""
-output_root="${ITK_ARTIFACT_ROOT:-/data/${USER:?USER is not set}/artifacts}/profiles"
+runtime_root="${ITK_RUNTIME_ROOT:-${XDG_CACHE_HOME:-${HOME:?HOME is not set}/.cache}/fused-index-topk}"
+output_root="${ITK_ARTIFACT_ROOT:-${runtime_root}/artifacts}/profiles"
 
 usage() {
     echo "usage: scripts/profile_nsys.sh --variant ID --target-length N --run-id ID --correctness PATH [--config PATH] [--replicate N] [--output-root PATH]" >&2
@@ -87,7 +88,7 @@ done
 mkdir -p "${profile_dir}"
 
 target_command=(
-    python -m index_topk_perflab.profile capture
+    python -m fused_index_topk.profile capture
     --config "${config}"
     --variant "${variant}"
     --target-length "${target_length}"
@@ -148,14 +149,14 @@ if ! ITK_VARIANT_CACHE_KEY="${variant_cache_key}" \
 fi
 mv -- "${stats_tmp}" "${stats_csv}"
 trap - EXIT
-PYTHONPATH=src python3 -m index_topk_perflab.profile_validation nsys \
+PYTHONPATH=src python3 -m fused_index_topk.profile_validation nsys \
     --input "${stats_csv}" \
     --expected-nvtx-label "${nvtx_label}" \
     --stage pipeline \
     --output "${verification_json}"
 
 ITK_VARIANT_CACHE_KEY="${variant_cache_key}" \
-scripts/run_h20.sh python -m index_topk_perflab.profile finalize \
+scripts/run_h20.sh python -m fused_index_topk.profile finalize \
     --metadata "${metadata}" \
     --native-report "${report}" \
     --export "${sqlite}" \

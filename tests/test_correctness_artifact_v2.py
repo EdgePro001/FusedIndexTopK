@@ -5,12 +5,12 @@ from pathlib import Path
 
 import pytest
 
-from index_topk_perflab.artifacts import canonical_hash, write_json_atomic
-from index_topk_perflab.config import load_config
-from index_topk_perflab.contract import plan_identity, protocol_identity
-from index_topk_perflab.provenance import experiment_identity, variant_identity
-from index_topk_perflab.registry import load_variant
-from index_topk_perflab.runner import file_sha256, verify_correctness_artifact
+from fused_index_topk.artifacts import canonical_hash, write_json_atomic
+from fused_index_topk.config import load_config
+from fused_index_topk.contract import plan_identity, protocol_identity
+from fused_index_topk.provenance import experiment_identity, variant_identity
+from fused_index_topk.registry import load_variant
+from fused_index_topk.runner import file_sha256, verify_correctness_artifact
 
 ROOT = Path(__file__).resolve().parents[1]
 CONFIG = ROOT / "configs" / "fused_index_topk_h20.json"

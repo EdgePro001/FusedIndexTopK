@@ -4,7 +4,7 @@ import json
 
 import pytest
 
-from index_topk_perflab.summary import (
+from fused_index_topk.summary import (
     read_measurements,
     summarize_measurements,
     validate_measurements,

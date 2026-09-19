@@ -3,8 +3,8 @@ from __future__ import annotations
 from dataclasses import replace
 from pathlib import Path
 
-from index_topk_perflab.config import load_config
-from index_topk_perflab.contract import (
+from fused_index_topk.config import load_config
+from fused_index_topk.contract import (
     plan_identity,
     profiling_plan_identity,
     protocol_identity,
@@ -26,27 +26,32 @@ def test_resolved_fusion_problem_is_explicit_and_machine_readable() -> None:
         "head_dim": 128,
         "top_k": 2048,
         "benchmark_cases": [
-            {"query_tokens": 4096, "context_tokens": 6144},
             {"query_tokens": 4096, "context_tokens": 8192},
-            {"query_tokens": 4096, "context_tokens": 12288},
             {"query_tokens": 4096, "context_tokens": 16384},
+            {"query_tokens": 4096, "context_tokens": 32768},
+            {"query_tokens": 4096, "context_tokens": 65536},
+            {"query_tokens": 4096, "context_tokens": 131072},
+            {"query_tokens": 4096, "context_tokens": 163840},
         ],
-        "context_token_values": [6144, 8192, 12288, 16384],
+        "context_token_values": [8192, 16384, 32768, 65536, 131072, 163840],
         "irregular_benchmark_cases": [
-            {"query_tokens": 4096, "context_tokens": 6144},
-            {"query_tokens": 4096, "context_tokens": 12288},
+            {"query_tokens": 4096, "context_tokens": 163840},
         ],
         "correctness_cases": [
-            {"query_tokens": 4096, "context_tokens": 6144},
             {"query_tokens": 4096, "context_tokens": 8192},
-            {"query_tokens": 4096, "context_tokens": 12288},
             {"query_tokens": 4096, "context_tokens": 16384},
+            {"query_tokens": 4096, "context_tokens": 32768},
+            {"query_tokens": 4096, "context_tokens": 65536},
+            {"query_tokens": 4096, "context_tokens": 131072},
+            {"query_tokens": 4096, "context_tokens": 163840},
         ],
         "correctness_kv_tile_remainders": {
-            "q4096-kv6144": 0,
             "q4096-kv8192": 0,
-            "q4096-kv12288": 0,
             "q4096-kv16384": 0,
+            "q4096-kv32768": 0,
+            "q4096-kv65536": 0,
+            "q4096-kv131072": 0,
+            "q4096-kv163840": 0,
         },
     }
     assert contract["inputs"]["q"]["dtype"] == "float8_e4m3fn"

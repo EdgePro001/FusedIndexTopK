@@ -5,13 +5,13 @@ from collections import deque
 
 import pytest
 
-from index_topk_perflab.real_corpus import (
+from fused_index_topk.real_corpus import (
     TokenDocument,
     pack_balanced_documents,
     stable_document_split,
     validate_document_disjointness,
 )
-from index_topk_perflab.replay import validate_replay_manifest
+from fused_index_topk.replay import validate_replay_manifest
 
 
 def _item(split: str, fixture: str, suffix: str) -> dict:

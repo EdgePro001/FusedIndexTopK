@@ -6,14 +6,14 @@ from __future__ import annotations
 import argparse
 import json
 
-from index_topk_perflab.config import load_config
-from index_topk_perflab.nvtx import (
+from fused_index_topk.config import load_config
+from fused_index_topk.nvtx import (
     ncu_push_pop_filter,
     pipeline_label,
     stage_label,
 )
-from index_topk_perflab.provenance import variant_identity
-from index_topk_perflab.registry import load_variant
+from fused_index_topk.provenance import variant_identity
+from fused_index_topk.registry import load_variant
 
 
 def _parser() -> argparse.ArgumentParser:

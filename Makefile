@@ -1,11 +1,11 @@
 PYTHON ?= python3
 CONFIG ?= configs/fused_index_topk_h20.json
-VARIANT ?= deepgemm_flashinfer_topk_auto
+VARIANT ?= fused_index_topk
 CANDIDATE ?= fused_index_topk
-RUN_ID ?= itk-manual
+RUN_ID ?= fused-index-topk-manual
 EVAL_RUN_ID ?= h20-eval-$(shell date -u +%Y%m%dT%H%M%SZ)
 MODE ?= screening
-ARTIFACT_ROOT ?= /data/$(USER)/artifacts
+ARTIFACT_ROOT ?= artifacts
 CORRECTNESS ?= $(ARTIFACT_ROOT)/raw/$(RUN_ID)/$(VARIANT)/correctness.json
 BENCHMARK ?= $(ARTIFACT_ROOT)/raw/$(RUN_ID)/$(VARIANT)/benchmark.json
 
@@ -18,16 +18,16 @@ lint:
 	$(PYTHON) -m ruff check .
 
 variants:
-	$(PYTHON) -c 'from index_topk_perflab.registry import available_variants; print(*available_variants(), sep="\n")'
+	$(PYTHON) -c 'from fused_index_topk.registry import available_variants; print(*available_variants(), sep="\n")'
 
 setup-h20:
 	scripts/setup_h20.sh
 
 check:
-	scripts/run_h20.sh $(PYTHON) -m index_topk_perflab.cli check --config $(CONFIG) --variant $(VARIANT) --run-id $(RUN_ID)
+	scripts/run_h20.sh $(PYTHON) -m fused_index_topk.cli check --config $(CONFIG) --variant $(VARIANT) --run-id $(RUN_ID)
 
 bench:
-	python3 scripts/live_progress.py --kind benchmark --label "benchmark $(VARIANT)" --config $(CONFIG) --artifact $(BENCHMARK) -- scripts/run_h20.sh $(PYTHON) -m index_topk_perflab.cli bench --config $(CONFIG) --variant $(VARIANT) --run-id $(RUN_ID) --correctness $(CORRECTNESS) --output $(BENCHMARK)
+	python3 scripts/live_progress.py --kind benchmark --label "benchmark $(VARIANT)" --config $(CONFIG) --artifact $(BENCHMARK) -- scripts/run_h20.sh $(PYTHON) -m fused_index_topk.cli bench --config $(CONFIG) --variant $(VARIANT) --run-id $(RUN_ID) --correctness $(CORRECTNESS) --output $(BENCHMARK)
 
 evaluate:
 	scripts/evaluate_h20.sh --candidate $(CANDIDATE) --mode $(MODE) --run-id $(EVAL_RUN_ID) --config $(CONFIG) --artifact-root $(ARTIFACT_ROOT)

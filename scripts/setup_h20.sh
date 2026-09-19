@@ -2,14 +2,14 @@
 set -euo pipefail
 
 project_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-runtime_root="${ITK_RUNTIME_ROOT:-/data/${USER:?USER is not set}}"
+runtime_root="${ITK_RUNTIME_ROOT:-${XDG_CACHE_HOME:-${HOME:?HOME is not set}/.cache}/fused-index-topk}"
 venv="${runtime_root}/runtime/venv"
 torch_lib="${venv}/lib/python3.12/site-packages/torch/lib"
 cuda_home="${CUDA_HOME:-/usr/local/cuda-13.0}"
 deepgemm_source="${runtime_root}/src/DeepGEMM-exact"
-flashinfer_source="${runtime_root}/src/flashinfer-v0.6.17"
+deepselect_source="${runtime_root}/src/DeepSelect-exact"
 config="${project_root}/configs/fused_index_topk_h20.json"
-flashinfer_lock="${project_root}/src/index_topk_perflab/variants/deepgemm_flashinfer/SOURCE_LOCK.json"
+deepselect_lock="${project_root}/src/fused_index_topk/variants/deepgemm_deepselect/SOURCE_LOCK.json"
 
 if [[ ! -x "${cuda_home}/bin/nvcc" ]]; then
     echo "missing CUDA toolkit: ${cuda_home}" >&2
@@ -35,28 +35,26 @@ if [[ -n "$(git -C "${deepgemm_source}" status --short)" ]]; then
 fi
 git -C "${deepgemm_source}" submodule update --init --recursive
 
-flashinfer_repository="$(python3 -c \
+deepselect_repository="$(python3 -c \
     'import json,sys; print(json.load(open(sys.argv[1], encoding="utf-8"))["repository"])' \
-    "${flashinfer_lock}")"
-flashinfer_tag="$(python3 -c \
-    'import json,sys; print(json.load(open(sys.argv[1], encoding="utf-8"))["tag"])' \
-    "${flashinfer_lock}")"
-expected_flashinfer_commit="$(python3 -c \
+    "${deepselect_lock}")"
+expected_deepselect_commit="$(python3 -c \
     'import json,sys; print(json.load(open(sys.argv[1], encoding="utf-8"))["commit"])' \
-    "${flashinfer_lock}")"
-if [[ ! -d "${flashinfer_source}/.git" ]]; then
-    git clone --branch "${flashinfer_tag}" --depth 1 \
-        "${flashinfer_repository}" "${flashinfer_source}"
+    "${deepselect_lock}")"
+if [[ ! -d "${deepselect_source}/.git" ]]; then
+    git clone "${deepselect_repository}" "${deepselect_source}"
+    git -C "${deepselect_source}" checkout --detach "${expected_deepselect_commit}"
 fi
-actual_flashinfer_commit="$(git -C "${flashinfer_source}" rev-parse HEAD)"
-if [[ "${actual_flashinfer_commit}" != "${expected_flashinfer_commit}" ]]; then
-    echo "FlashInfer checkout mismatch: expected ${expected_flashinfer_commit}, got ${actual_flashinfer_commit}" >&2
+actual_deepselect_commit="$(git -C "${deepselect_source}" rev-parse HEAD)"
+if [[ "${actual_deepselect_commit}" != "${expected_deepselect_commit}" ]]; then
+    echo "DeepSelect checkout mismatch: expected ${expected_deepselect_commit}, got ${actual_deepselect_commit}" >&2
     exit 1
 fi
-if [[ -n "$(git -C "${flashinfer_source}" status --short)" ]]; then
-    echo "FlashInfer checkout must be clean" >&2
+if [[ -n "$(git -C "${deepselect_source}" status --short)" ]]; then
+    echo "DeepSelect checkout must be clean" >&2
     exit 1
 fi
+git -C "${deepselect_source}" submodule update --init --recursive
 
 if [[ ! -x "${venv}/bin/python" ]]; then
     # Some minimal Ubuntu images omit the distro ensurepip package.  The
@@ -113,6 +111,6 @@ common_env=(
 
 "${common_env[@]}" \
     DEEPGEMM_SOURCE="${deepgemm_source}" \
-    FLASHINFER_SOURCE="${flashinfer_source}" \
+    DEEPSELECT_SOURCE="${deepselect_source}" \
     "${venv}/bin/python" -c \
-    'import importlib.metadata as m, deep_gemm, deep_gemm_cpp, torch; from pathlib import Path; assert Path(__import__("os").environ["FLASHINFER_SOURCE"], "include/flashinfer/topk.cuh").is_file(); print("torch", torch.__version__, "cuda", torch.version.cuda); print("deep_gemm", m.version("deep_gemm"), deep_gemm.__file__); print("deep_gemm_cpp", deep_gemm_cpp.__file__); print("device", torch.cuda.get_device_name(0), torch.cuda.get_device_capability(0))'
+    'import importlib.metadata as m, deep_gemm, deep_gemm_cpp, torch; from pathlib import Path; assert Path(__import__("os").environ["DEEPSELECT_SOURCE"], "csrc/cuda_kernels/v3_fp32/topk_select.cuh").is_file(); print("torch", torch.__version__, "cuda", torch.version.cuda); print("deep_gemm", m.version("deep_gemm"), deep_gemm.__file__); print("deep_gemm_cpp", deep_gemm_cpp.__file__); print("device", torch.cuda.get_device_name(0), torch.cuda.get_device_capability(0))'

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import sys
 
-from index_topk_perflab.variants.common import (
+from fused_index_topk.variants.common import (
     deepgemm_indexer_stage,
     int32_output_stage,
     torch_exact_topk_stage,

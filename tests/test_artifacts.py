@@ -5,7 +5,7 @@ import math
 
 import pytest
 
-from index_topk_perflab.artifacts import (
+from fused_index_topk.artifacts import (
     canonical_hash,
     canonical_json,
     load_json,

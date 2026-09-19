@@ -1,68 +1,61 @@
-# Measurement and correctness methodology
+# Methodology
 
-## Primary and guardrail timing
+## Qualified workload
 
-Every published run records two clocks:
+- GPU: NVIDIA H20-3e, SM90, 78 SMs
+- query tokens: 4096
+- context tokens: 8192, 16384, 32768, 65536, 131072, 163840
+- Top-K: 2048, exact and unordered
+- indexer heads: 64
+- head dimension: 128
+- Q/KV: FP8 E4M3FN
+- causal range: `[0, N - Q + q + 1)`
 
-- `formal_kernel_sum`: the sum of CUDA kernel activity durations reported by
-  Kineto/CUPTI inside the operator range. This is the primary optimization
-  metric and excludes CPU launch API time and inter-kernel gaps.
-- `cuda_event_total`: CUDA Events around the full device pipeline. This includes
-  same-stream gaps and acts as an independent guardrail.
+The software revisions are frozen in the configuration and
+[THIRD_PARTY.md](../THIRD_PARTY.md).
 
-Compilation, allocation, replay loading, correctness checks, and input hashing
-run outside the timed range. An 8,000,000,000-byte device buffer is written
-before every trial to evict L2-resident working data; the flush itself is outside
-both timing ranges.
+## Real-corpus replay
 
-The Kineto topology gate requires every active trial for a shape to expose the
-same ordered activity sequence and requires every declared stage to be fully
-covered. This prevents accidental inclusion of the flush or omission of a
-candidate kernel.
+The release campaign used native-length contextual model captures from held-out
+real text, not synthetic random tensors and not truncated copies of one long
+sample. The source set contained 1,032 documents and 24 prompts. Measurements
+cover layers 0, 15, 30, 45, and 60; normal and hard splits; and two fixtures per
+split.
 
-## FusedIndexTopK release campaign
-
-- GPU: NVIDIA H20-3e, SM90, 78 SMs;
-- Q=4096, K=2048, H=64, D=128;
-- N in {6144, 8192, 12288, 16384};
-- layers {0, 15, 30, 45, 60};
-- held-out `test_normal` and `test_hard` replay splits;
-- A/B fixture bytes matched within each comparison cell;
-- 10 warmups, 20 Event trials, and 30 CUPTI trials per process;
-- three independent balanced-order blocks: FlashInfer/FusedIndexTopK/Torch,
-  FusedIndexTopK/Torch/FlashInfer, Torch/FlashInfer/FusedIndexTopK.
-
-The aggregate uses the median of block medians for each of 40 cells. Confidence
-intervals are a deterministic nonparametric bootstrap across cells. They do not
-treat repeated trials in one process as independent experiments.
+Captured tensors are not redistributed. The public result includes SHA-256
+identities for the token and capture manifests so authorized holders can verify
+the replay set without exposing source data.
 
 ## Correctness
 
-`torch.topk` over DeepGEMM scores is the independent semantic reference.
-FlashInfer is only the performance baseline and cannot certify itself.
+Each candidate output is compared with an independent
+DeepGEMM-plus-`torch.topk` reference. The check validates exact Top-K
+membership under the documented tie policy and also requires zero unresolved
+repair rows.
 
-Before and after benchmark trials, the harness checks:
+DeepSelect is the performance baseline, not the correctness oracle.
 
-- exact score multiset at the Kth threshold;
-- uniqueness, causal validity, dtype, shape, contiguity, and padding;
-- input SHA-256 and tensor version counters;
-- source, runtime, protocol, plan, and input-content fingerprints.
+## Timing
 
-Fault-injection cases force all rows through underflow repair, working-capacity
-overflow repair, and all-equal-score repair. The long-context path additionally tests partial
-tail chunks and CUDA memcheck/racecheck.
+Each cell uses the same input on the same GPU for the candidate and baseline:
 
-## Replay data policy
+- 12 hot trials per implementation
+- 4 operator calls per trial
+- 3 CUPTI observations per case
+- sampling and device repair included
+- JIT compilation, input loading, and post-run correctness checks excluded
 
-The reported replay tensors were generated from DeepSeek-V3.2-style indexer
-workloads and frozen before evaluation. Tuning fixtures are excluded from the
-release campaign. Model weights and tensor payloads are not redistributed by
-this repository; only aggregate evidence and hashes are public.
+The primary table reports the mean of paired hot-latency changes. Pairing avoids
+turning independent clock or load drift into a claimed operator improvement.
 
-This means another user can reproduce the code and protocol, but not the exact
-input bytes without independently generating a compatible replay corpus.
+## Reproducing the public matrix
 
-The public packaging was flattened after qualification so only one operator is
-exposed. The measured sampling, producer, reducer, and repair CUDA sources were
-verified byte-for-byte against the qualified sources; only module layout,
-Python dispatch, and public binding names changed.
+```bash
+scripts/setup_h20.sh
+make check CONFIG=configs/fused_index_topk_h20.json
+make bench CONFIG=configs/fused_index_topk_h20.json
+```
+
+Set `CUDA_VISIBLE_DEVICES` to the intended H20 and `ITK_RUNTIME_ROOT` if the
+default cache location is unsuitable. A different GPU, CUDA/PyTorch build,
+upstream revision, shape, or corpus requires a new qualification result.

@@ -4,8 +4,8 @@ import copy
 
 import pytest
 
-from index_topk_perflab.api import PrefillCase
-from index_topk_perflab.correctness import (
+from fused_index_topk.api import PrefillCase
+from fused_index_topk.correctness import (
     CorrectnessError,
     compare_topk_indices,
     validate_topk_indices,

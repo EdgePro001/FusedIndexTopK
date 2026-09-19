@@ -2,14 +2,14 @@ from __future__ import annotations
 
 import pytest
 
-from index_topk_perflab.api import (
+from fused_index_topk.api import (
     PrefillCase,
     PreparedGraph,
     StageNode,
     StageSpec,
     VariantDescriptor,
 )
-from index_topk_perflab.nvtx import (
+from fused_index_topk.nvtx import (
     graph_labels,
     ncu_push_pop_filter,
     nvtx_range,

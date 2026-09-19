@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pytest
 
-from index_topk_perflab.config import ConfigError, build_prefill_cases, load_config, parse_config
+from fused_index_topk.config import ConfigError, build_prefill_cases, load_config, parse_config
 
 ROOT = Path(__file__).resolve().parents[1]
 CONFIG = ROOT / "configs" / "fused_index_topk_h20.json"
@@ -23,31 +23,35 @@ def _fusion_raw() -> dict:
 
 def test_load_frozen_prefill_config_and_build_cases() -> None:
     config = load_config(CONFIG)
-    assert config.name == "fused_index_topk_h20_v1"
+    assert config.name == "fused_index_topk_h20_v2"
     assert config.exact_reference_variant == "deepgemm_torch_unfused"
-    assert config.baseline_variant == "deepgemm_flashinfer_topk_auto"
+    assert config.baseline_variant == "deepgemm_deepselect_topk"
     assert config.target.compute_capability == (9, 0)
     assert config.target.gpu_name == "NVIDIA H20-3e"
     assert config.target.multiprocessor_count == 78
 
     benchmark = config.benchmark_cases()
     assert [(case.query_tokens, case.context_tokens) for case in benchmark] == [
-        (4096, 6144),
         (4096, 8192),
-        (4096, 12288),
         (4096, 16384),
+        (4096, 32768),
+        (4096, 65536),
+        (4096, 131072),
+        (4096, 163840),
     ]
-    assert benchmark[-1].query_start == 12288
+    assert benchmark[-1].query_start == 159744
     assert benchmark[-1].top_k == 2048
-    assert build_prefill_cases(config, purpose="profile")[0].context_tokens == 6144
+    assert build_prefill_cases(config, purpose="profile")[0].context_tokens == 16384
     assert [
         (case.query_tokens, case.context_tokens)
         for case in config.correctness_cases()
     ] == [
-        (4096, 6144),
         (4096, 8192),
-        (4096, 12288),
         (4096, 16384),
+        (4096, 32768),
+        (4096, 65536),
+        (4096, 131072),
+        (4096, 163840),
     ]
 
 
@@ -67,10 +71,10 @@ def test_load_explicit_fusion_v1_contract() -> None:
     assert workload.padding_index == -1
     assert workload.tie_policy == "exact_score_threshold"
     assert workload.causal_range == "[0,N-Q+q+1)"
-    assert len(config.benchmark_cases()) == 4
-    assert len(config.correctness_cases()) == 4
-    assert config.profile_lengths("nsys") == (6144, 12288, 16384)
-    assert config.profile_lengths("ncu") == (6144, 12288, 16384)
+    assert len(config.benchmark_cases()) == 6
+    assert len(config.correctness_cases()) == 6
+    assert config.profile_lengths("nsys") == (16384, 65536, 163840)
+    assert config.profile_lengths("ncu") == (16384, 65536, 163840)
     assert config.timing.warmup_iterations == 10
     assert config.timing.method == "deepgemm_kineto_cupti_v1"
     assert config.timing.event_trials == 20
