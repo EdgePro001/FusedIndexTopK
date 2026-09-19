@@ -27,6 +27,21 @@ list in global memory. Long-context overflow may use only the bounded spill
 described in [Architecture](docs/ARCHITECTURE.md) and
 [Repair analysis](docs/REPAIR_ANALYSIS.md).
 
+### Pipeline overlap
+
+Each persistent CTA assigns one warp to TMA, eight warps to tensor-core math,
+and three warps to exact Top-K. Double-buffered candidate slots and ready/free
+barriers let math produce query pair `i` while Top-K consumes pair `i - 1`;
+TMA continues feeding the math pipeline independently.
+
+![TMA, math, and Top-K work overlapped inside the persistent fused kernel](docs/assets/fused-pipeline-overlap.png)
+
+The timeline is conceptual and not drawn to scale. In steady state, most Top-K
+work is hidden under later TMA and math work. The useful measure of fusion
+overhead is therefore the end-to-end gap between a matched math-only control
+and the fused kernel—not the standalone duration of the Top-K stage. A short
+exposed tail means the overlap is effective; it does not mean Top-K is free.
+
 ![Execution-path comparison for DeepGEMM plus FlashInfer, DeepGEMM plus DeepSelect, and FusedIndexTopK](docs/assets/execution-paths.svg)
 
 | Property | DeepGEMM + FlashInfer | DeepGEMM + DeepSelect | FusedIndexTopK |
