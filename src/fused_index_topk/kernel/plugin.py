@@ -61,7 +61,7 @@ class FusedIndexTopK:
         plugin_id="fused_index_topk",
         display_name="FusedIndexTopK",
         api_version="1.0",
-        implementation_version="2.1.0",
+        implementation_version="2.0.0",
         mode="fused",
         description=(
             "Same-kernel DeepGEMM-style score production and exact Top-K with "
@@ -69,7 +69,7 @@ class FusedIndexTopK:
         ),
         implementation="project-local-deepgemm-derivative+custom-cuda-radix",
         exact_topk=True,
-        source_revision="fused-index-topk-v2.1",
+        source_revision="fused-index-topk-v2",
         tags=(
             "prefill",
             "sm90",
@@ -239,18 +239,6 @@ class FusedIndexTopK:
                 )
             )
 
-        # The causal ranges depend only on the case shape and are immutable
-        # across graph executions (including the lifecycle's A/B fixtures).
-        # Build them once during preparation instead of launching the same
-        # range-update kernel inside every timed repair stage.
-        long_repair.update_ranges_out(
-            inputs.k_start,
-            inputs.k_end,
-            chunk_starts,
-            chunk_ends,
-            case.context_tokens,
-        )
-
         def run_sample_gather(context: Any, artifacts: dict[str, Any]) -> None:
             del context
             standard: PrefillInputs = artifacts["inputs"]
@@ -324,6 +312,9 @@ class FusedIndexTopK:
         def run_hierarchical_repair(context: Any, artifacts: dict[str, Any]) -> None:
             del context
             standard: PrefillInputs = artifacts["inputs"]
+            long_repair.update_ranges_out(
+                standard.k_start, standard.k_end, chunk_starts, chunk_ends, case.context_tokens
+            )
             for chunk_index, chunk in enumerate(chunks):
                 logical_offset, chunk_elements, chunk_start, chunk_end = chunk
                 chunk_kv = standard.kv.narrow(0, logical_offset, chunk_elements)
@@ -438,6 +429,7 @@ class FusedIndexTopK:
                     ),
                     kernel_regexes=(
                         "masked_repair_producer",
+                        "itk_update_chunk_ranges",
                         "itk_chunk_local_topk",
                         "itk_merge_topk_pairs",
                         "itk_finalize_repair",
@@ -466,7 +458,6 @@ class FusedIndexTopK:
                 "repair_dispatch": "device-mask-no-host-sync",
                 "repair_chunk_elements": _REPAIR_CHUNK_ELEMENTS,
                 "repair_chunks": len(chunks),
-                "repair_ranges_precomputed": True,
                 "repair_merge": "online-exact-top2048-pairs",
                 "repair_workspace_bounded_in_n": True,
                 "normal_candidate_gmem_bytes": 0,

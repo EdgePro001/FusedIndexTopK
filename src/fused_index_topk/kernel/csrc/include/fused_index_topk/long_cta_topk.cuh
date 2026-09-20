@@ -252,7 +252,7 @@ __device__ __forceinline__ void select_row(
     const int lane = tid & 31;
     const int warp = tid / 32;
     for (int segment = warp; segment < kSegments; segment += 3) {
-        const int count = scratch->counts[slot][segment];
+        const int count = min(scratch->counts[slot][segment], kSegmentCapacity);
         for (int base = 0; base < count; base += 32) {
             const int offset = base + lane;
             const bool valid_slot = offset < count;
