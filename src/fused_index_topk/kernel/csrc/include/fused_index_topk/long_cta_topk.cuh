@@ -244,28 +244,39 @@ __device__ __forceinline__ void select_row(
     const uint32_t threshold = scratch->threshold;
     const int equal_needed = scratch->rank;
     const int total_greater = kTopK - equal_needed;
-    for (int i = tid; i < kCandidateCapacity; i += 96) {
-        const bool valid_slot =
-            i % kSegmentCapacity < scratch->counts[slot][i / kSegmentCapacity];
-        uint64_t pair = 0;
-        uint32_t score = 0;
-        if constexpr (ITK_LONG_TUNING & 1) {
-            if (valid_slot) score = scratch->load_score(slot, i);
-        } else {
-            pair = valid_slot ? scratch->load_pair(slot, i) : 0;
-            score = pair >> 32;
-        }
-        const bool greater = valid_slot && score > threshold;
-        const bool equal = valid_slot && score == threshold;
-        const int g = reserve(&scratch->greater_counter, greater);
-        const int e = reserve(&scratch->equal_counter, equal);
-        if constexpr (ITK_LONG_TUNING & 1) {
-            if (greater || (equal && e < equal_needed))
-                output[greater ? g : total_greater + e] = scratch->load_index(slot, i);
-        } else {
-            if (greater) output[g] = static_cast<int32_t>(pair);
-            if (equal && e < equal_needed)
-                output[total_greater + e] = static_cast<int32_t>(pair);
+    // Walk only live entries. Three selection warps own disjoint segments;
+    // the loop bound is a segment's published count, so the old full-capacity
+    // scan no longer pays an integer divide/modulo and a validity branch for
+    // every unused slot. The final partial batch still calls reserve from
+    // every lane, preserving its warp-aggregate ballot/atomic contract.
+    const int lane = tid & 31;
+    const int warp = tid / 32;
+    for (int segment = warp; segment < kSegments; segment += 3) {
+        const int count = min(scratch->counts[slot][segment], kSegmentCapacity);
+        for (int base = 0; base < count; base += 32) {
+            const int offset = base + lane;
+            const bool valid_slot = offset < count;
+            const int i = segment * kSegmentCapacity + offset;
+            uint64_t pair = 0;
+            uint32_t score = 0;
+            if constexpr (ITK_LONG_TUNING & 1) {
+                if (valid_slot) score = scratch->load_score(slot, i);
+            } else {
+                pair = valid_slot ? scratch->load_pair(slot, i) : 0;
+                score = pair >> 32;
+            }
+            const bool greater = valid_slot && score > threshold;
+            const bool equal = valid_slot && score == threshold;
+            const int g = reserve(&scratch->greater_counter, greater);
+            const int e = reserve(&scratch->equal_counter, equal);
+            if constexpr (ITK_LONG_TUNING & 1) {
+                if (greater || (equal && e < equal_needed))
+                    output[greater ? g : total_greater + e] = scratch->load_index(slot, i);
+            } else {
+                if (greater) output[g] = static_cast<int32_t>(pair);
+                if (equal && e < equal_needed)
+                    output[total_greater + e] = static_cast<int32_t>(pair);
+            }
         }
     }
     if (scratch->spill_count) {

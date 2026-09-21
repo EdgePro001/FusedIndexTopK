@@ -2,37 +2,35 @@
 
 ## Release result
 
-FusedIndexTopK 2.0.0 passed all 120 exactness checks in the real-corpus H20
-campaign. Against the pinned DeepGEMM + DeepSelect baseline, it won every
-measured case from 16K through 160K context.
+FusedIndexTopK 2.1.0 passed all 120 exactness checks in the real-corpus H20
+campaign. Against the pinned DeepGEMM + DeepSelect baseline, it won 116 of 120
+paired cases, including every case from 16K through 128K context.
 
 | Context | Cases | Baseline mean | Fused mean | Paired mean change | Wins |
 |---:|---:|---:|---:|---:|---:|
-| 8,192 | 20 | 1.870 ms | 1.949 ms | +4.26% | 0 |
-| 16,384 | 20 | 4.255 ms | 3.799 ms | -10.72% | 20 |
-| 32,768 | 20 | 8.689 ms | 7.881 ms | -9.30% | 20 |
-| 65,536 | 20 | 17.174 ms | 16.084 ms | -6.34% | 20 |
-| 131,072 | 20 | 33.848 ms | 32.470 ms | -4.07% | 20 |
-| 163,840 | 20 | 41.999 ms | 40.531 ms | -3.49% | 20 |
+| 8,192 | 20 | 1.887 ms | 1.881 ms | -0.33% | 17 |
+| 16,384 | 20 | 4.280 ms | 3.883 ms | -9.27% | 20 |
+| 32,768 | 20 | 8.721 ms | 7.893 ms | -9.49% | 20 |
+| 65,536 | 20 | 17.170 ms | 16.087 ms | -6.31% | 20 |
+| 131,072 | 20 | 33.831 ms | 32.540 ms | -3.82% | 20 |
+| 163,840 | 20 | 41.979 ms | 40.591 ms | -3.31% | 19 |
 
 A negative change means FusedIndexTopK is faster. The campaign includes
 sampling and device repair in both timing and correctness.
 
 ## Stability across layers
 
-At every context length from 16K to 160K, all four inputs at each sampled layer
-won. The weakest winning layer/context cell was still faster than the paired
-baseline. At 8K, all layer cells were slower, which establishes a clear
-dispatch boundary rather than a universal speed claim.
+All 80 cases from 16K through 128K won. At 160K, 19 of 20 cases won; the single
+loss was +0.56%. At 8K, 17 of 20 cases won, but the mean improvement was only
+0.33% and the per-case range was -0.89% to +0.89%. This establishes strong
+mid- and long-context gains while treating 8K honestly as near parity.
 
-## Repair observations
+## Exactness and repair
 
-The fast path flagged 73 rows at 16K and 3 rows at 128K across the complete
-campaign. All other context lengths had zero flagged rows. Every flagged row
-was repaired exactly and the final unresolved-repair count was zero.
-
-A fast-path flag is not an incorrect output. It means the conservative device
-guard selected the exact repair path for that row.
+Sampling, bounded overflow handling, and device-side exact repair are included
+in the timed operator path. Every final output matched the independent exact
+reference. The compact public summary intentionally reports final correctness
+rather than internal fast-path flag counts.
 
 ## Claim boundary
 
@@ -41,4 +39,4 @@ not whole-model measurements and do not establish TTFT, TPOT, TPS, energy, or
 multi-GPU scaling. Those claims require an end-to-end serving experiment.
 
 Machine-readable data and hashes are in
-[fused-index-topk-real-corpus-h20-v2.json](../results/fused-index-topk-real-corpus-h20-v2.json).
+[fused-index-topk-real-corpus-h20-v2.1.json](../results/fused-index-topk-real-corpus-h20-v2.1.json).

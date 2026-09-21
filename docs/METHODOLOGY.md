@@ -37,16 +37,22 @@ DeepSelect is the performance baseline, not the correctness oracle.
 
 ## Timing
 
-Each cell uses the same input on the same GPU for the candidate and baseline:
+The current 2.1 H20 campaign uses the same input on the same GPU for the
+candidate and baseline, interleaves variants, and alternates variant order
+across layers:
 
-- 12 hot trials per implementation
-- 4 operator calls per trial
-- 3 CUPTI observations per case
+- 5 warmup iterations
+- 12 CUDA Event operator trials per implementation and fixture
+- 3 Kineto/CUPTI observations per implementation and fixture
+- 64 MB L2 flush between timed trials
 - sampling and device repair included
 - JIT compilation, input loading, and post-run correctness checks excluded
 
-The primary table reports the mean of paired hot-latency changes. Pairing avoids
-turning independent clock or load drift into a claimed operator improvement.
+For each context, the primary table reports the mean of the 20 per-fixture
+CUDA Event medians and the equal-weight mean of 20 paired percentage changes.
+The historical 2.0 artifact used a different 12-by-4 hot-trial protocol; its
+latencies are not mixed into the current table. Pairing limits the effect of
+independent clock or load drift on the reported operator improvement.
 
 ## Reproducing the public matrix
 

@@ -8,24 +8,25 @@
   },
   "tracks": {
     "deepgemm_deepselect_current": {
-      "implementation_version": "2.0.0",
+      "implementation_version": "2.1.0",
       "input_kind": "native-length held-out real-corpus captures",
       "query_tokens": 4096,
       "top_k": 2048,
       "contexts": [8192, 16384, 32768, 65536, 131072, 163840],
       "cases": 120,
       "exact_cases": 120,
-      "wins_16384_through_163840": 100,
-      "cases_16384_through_163840": 100,
+      "wins_all_contexts": 116,
+      "wins_16384_through_131072": 80,
+      "cases_16384_through_131072": 80,
       "paired_mean_change_pct": {
-        "8192": 4.262858349096877,
-        "16384": -10.721890483495233,
-        "32768": -9.304385939868164,
-        "65536": -6.340708269857279,
-        "131072": -4.071154100190667,
-        "163840": -3.492084339089927
+        "8192": -0.3281754123204156,
+        "16384": -9.2732768989426,
+        "32768": -9.493168088077264,
+        "65536": -6.309429200694034,
+        "131072": -3.816171952535054,
+        "163840": -3.3062635918092855
       },
-      "detail": "fused-index-topk-real-corpus-h20-v2.json"
+      "detail": "fused-index-topk-real-corpus-h20-v2.1.json"
     },
     "deepgemm_flashinfer_short_historical": {
       "implementation_generation": "previous short-context release",

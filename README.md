@@ -75,29 +75,30 @@ context lengths. Every case matched an independent exact reference.
 
 | N | DeepGEMM + DeepSelect | FusedIndexTopK | Paired change | Wins |
 |---:|---:|---:|---:|---:|
-| 8K | 1.870 ms | 1.949 ms | +4.26% | 0/20 |
-| 16K | 4.255 ms | 3.799 ms | -10.72% | 20/20 |
-| 32K | 8.689 ms | 7.881 ms | -9.30% | 20/20 |
-| 64K | 17.174 ms | 16.084 ms | -6.34% | 20/20 |
-| 128K | 33.848 ms | 32.470 ms | -4.07% | 20/20 |
-| 160K | 41.999 ms | 40.531 ms | -3.49% | 20/20 |
+| 8K | 1.887 ms | 1.881 ms | -0.33% | 17/20 |
+| 16K | 4.280 ms | 3.883 ms | -9.27% | 20/20 |
+| 32K | 8.721 ms | 7.893 ms | -9.49% | 20/20 |
+| 64K | 17.170 ms | 16.087 ms | -6.31% | 20/20 |
+| 128K | 33.831 ms | 32.540 ms | -3.82% | 20/20 |
+| 160K | 41.979 ms | 40.591 ms | -3.31% | 19/20 |
 
 ![H20 operator latency comparison against DeepSelect, with separately qualified historical FlashInfer campaigns](docs/assets/h20-baseline-comparison.svg)
 
-Lower is better. The 16K–160K range won all 100 measured cases. The 8K path is
-supported and exact, but is not faster than the baseline; a production
-dispatcher should retain DeepSelect at 8K unless that path is retuned.
+Lower is better. Version 2.1 won 116 of 120 paired cases: all 80 cases from
+16K through 128K, 19 of 20 at 160K, and 17 of 20 at 8K. The 8K mean advantage
+is only 0.33%, so it should be treated as near parity rather than a robust
+speedup claim.
 
 Two independently qualified baseline tracks are available:
 
 | Baseline track | Workload and implementation generation | Evidence |
 |---|---|---|
-| DeepGEMM + DeepSelect | current 2.0.0; real corpus, 8K–160K | 100/100 wins at 16K–160K; 8K is 4.26% slower |
+| DeepGEMM + DeepSelect | current 2.1.0; real corpus, 8K–160K | 116/120 wins overall; 80/80 at 16K–128K |
 | DeepGEMM + FlashInfer | previous short-context release; real corpus, 6K–16K | 40/40 wins; median CUPTI reduction 14.71% |
 | DeepGEMM + FlashInfer | previous long-context development run; layer 0, 32K–128K | six of six cells faster by 4.87%–7.77% |
 
 The FlashInfer rows are historical qualification results from an earlier fused
-implementation, not a cross-run estimate for 2.0.0. They are shown to document
+implementation, not a cross-run estimate for 2.1.0. They are shown to document
 both baseline families without pretending that measurements from different
 campaigns are directly interchangeable. A fresh three-way campaign is required
 for a current head-to-head ranking. The compact provenance record is
@@ -105,7 +106,7 @@ for a current head-to-head ranking. The compact provenance record is
 
 These are operator measurements, not end-to-end TTFT, TPOT, or TPS claims.
 Full measurements and provenance are in
-[the release artifact](results/fused-index-topk-real-corpus-h20-v2.json) and
+[the release artifact](results/fused-index-topk-real-corpus-h20-v2.1.json) and
 [Results](docs/RESULTS.md).
 
 ## Repository layout

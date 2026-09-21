@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="610" viewBox="0 0 1200 610" role="img" aria-labelledby="title desc">
   <title id="title">H20 baseline comparison</title>
-  <desc id="desc">Current FusedIndexTopK latency change against DeepSelect by context length and historical speedups against FlashInfer from separately qualified campaigns.</desc>
+  <desc id="desc">FusedIndexTopK 2.1 latency speedup against DeepSelect by context length, with 116 wins among 120 paired real-corpus cases, and historical speedups against FlashInfer from separately qualified campaigns.</desc>
   <defs>
     <style>
       .bg{fill:#0d1117}.panel{fill:#161b22;stroke:#30363d;stroke-width:2}.title{fill:#f0f6fc;font:700 23px system-ui,sans-serif}.head{fill:#f0f6fc;font:650 18px system-ui,sans-serif}.text{fill:#b1bac4;font:14px system-ui,sans-serif}.tick{fill:#8b949e;font:12px system-ui,sans-serif}.grid{stroke:#30363d;stroke-width:1}.zero{stroke:#8b949e;stroke-width:2}.good{fill:#3fb950}.bad{fill:#f85149}.historic{fill:#58a6ff}.note{fill:#8b949e;font:italic 13px system-ui,sans-serif}
@@ -9,17 +9,17 @@
   <rect class="bg" width="1200" height="610"/>
   <text class="title" x="36" y="42">H20 exact Top-K baseline comparisons</text>
   <rect class="panel" x="30" y="66" width="710" height="500" rx="14"/>
-  <text class="head" x="55" y="101">Current 2.0.0 vs DeepGEMM + DeepSelect</text>
+  <text class="head" x="55" y="101">Current 2.1.0 vs DeepGEMM + DeepSelect</text>
   <text class="text" x="55" y="126">Paired operator speedup; positive is faster</text>
   <line class="grid" x1="170" y1="155" x2="170" y2="510"/><line class="zero" x1="330" y1="155" x2="330" y2="510"/>
   <line class="grid" x1="490" y1="155" x2="490" y2="510"/><line class="grid" x1="650" y1="155" x2="650" y2="510"/>
   <text class="tick" x="151" y="531">-5%</text><text class="tick" x="322" y="531">0%</text><text class="tick" x="476" y="531">+5%</text><text class="tick" x="632" y="531">+10%</text>
-  <text class="text" x="75" y="183">8K</text><rect class="bad" x="194" y="164" width="136" height="27" rx="4"/><text class="text" x="201" y="182">−4.26%</text>
-  <text class="text" x="67" y="241">16K</text><rect class="good" x="330" y="222" width="343" height="27" rx="4"/><text class="text" x="680" y="240">+10.72%</text>
-  <text class="text" x="67" y="299">32K</text><rect class="good" x="330" y="280" width="298" height="27" rx="4"/><text class="text" x="635" y="298">+9.30%</text>
-  <text class="text" x="67" y="357">64K</text><rect class="good" x="330" y="338" width="203" height="27" rx="4"/><text class="text" x="540" y="356">+6.34%</text>
-  <text class="text" x="59" y="415">128K</text><rect class="good" x="330" y="396" width="130" height="27" rx="4"/><text class="text" x="467" y="414">+4.07%</text>
-  <text class="text" x="59" y="473">160K</text><rect class="good" x="330" y="454" width="112" height="27" rx="4"/><text class="text" x="449" y="472">+3.49%</text>
+  <text class="text" x="75" y="183">8K</text><rect class="good" x="330" y="164" width="11" height="27" rx="4"/><text class="text" x="348" y="182">+0.33%</text>
+  <text class="text" x="67" y="241">16K</text><rect class="good" x="330" y="222" width="297" height="27" rx="4"/><text class="text" x="634" y="240">+9.27%</text>
+  <text class="text" x="67" y="299">32K</text><rect class="good" x="330" y="280" width="304" height="27" rx="4"/><text class="text" x="641" y="298">+9.49%</text>
+  <text class="text" x="67" y="357">64K</text><rect class="good" x="330" y="338" width="202" height="27" rx="4"/><text class="text" x="539" y="356">+6.31%</text>
+  <text class="text" x="59" y="415">128K</text><rect class="good" x="330" y="396" width="122" height="27" rx="4"/><text class="text" x="459" y="414">+3.82%</text>
+  <text class="text" x="59" y="473">160K</text><rect class="good" x="330" y="454" width="106" height="27" rx="4"/><text class="text" x="443" y="472">+3.31%</text>
   <rect class="panel" x="765" y="66" width="405" height="500" rx="14"/>
   <text class="head" x="790" y="101">Historical vs DeepGEMM + FlashInfer</text>
   <text class="text" x="790" y="126">Separately qualified earlier fused builds</text>
