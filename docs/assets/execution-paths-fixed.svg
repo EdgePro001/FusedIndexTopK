@@ -1,0 +1,79 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1896" height="829" viewBox="0 0 1896 829" role="img" aria-labelledby="title desc">
+  <title id="title">Exact Indexer Top-K execution paths</title>
+  <desc id="desc">Comparison of DeepGEMM plus FlashInfer, DeepGEMM plus DeepSelect, and FusedIndexTopK execution paths.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#0a111a"/>
+      <stop offset="50%" stop-color="#111a25"/>
+      <stop offset="100%" stop-color="#0a111a"/>
+    </linearGradient>
+    <linearGradient id="greenBox" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#0c4c2e"/>
+      <stop offset="100%" stop-color="#104b30"/>
+    </linearGradient>
+    <linearGradient id="amberBox" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#594116"/>
+      <stop offset="100%" stop-color="#624715"/>
+    </linearGradient>
+    <marker id="arrowGray" markerWidth="18" markerHeight="14" refX="14" refY="7" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0 0 L0 14 L16 7 Z" fill="#a8b0ba"/>
+    </marker>
+    <style><![CDATA[
+      text { font-family: "DejaVu Sans", Arial, sans-serif; }
+      .title { fill:#f2f5f8; font-size:38px; font-weight:700; }
+      .panel { fill:#151d28; stroke:#303a47; stroke-width:3; }
+      .section { fill:#f2f5f8; font-size:27px; font-weight:700; }
+      .box { fill:#252d38; stroke:#9ca6b1; stroke-width:3; }
+      .box-title { fill:#f2f5f8; font-size:30px; font-weight:700; text-anchor:middle; }
+      .sub { fill:#bdc4cd; font-size:24px; font-weight:400; text-anchor:middle; }
+      .warn { fill:#f1c54b; font-size:24px; font-weight:700; text-anchor:middle; }
+      .indices { fill:#bdc4cd; font-size:24px; font-weight:400; }
+      .arrow { stroke:#a8b0ba; stroke-width:5; fill:none; marker-end:url(#arrowGray); }
+      .green-line { stroke:#38d25c; stroke-width:5; fill:none; marker-end:url(#arrowGray); }
+      .green-title { fill:#f2f5f8; font-size:30px; font-weight:700; text-anchor:middle; }
+      .repair-text { fill:#d4d9df; font-size:21px; font-weight:400; text-anchor:middle; }
+    ]]></style>
+  </defs>
+
+  <rect width="1896" height="829" fill="url(#bg)"/>
+  <text class="title" x="55" y="73">Exact Indexer Top-K execution paths</text>
+
+  <!-- Row 1 -->
+  <rect class="panel" x="45" y="114" width="1753" height="184" rx="28"/>
+  <text class="section" x="80" y="171">DeepGEMM + FlashInfer</text>
+  <rect class="box" x="455" y="162" width="307" height="94" rx="16"/>
+  <text class="box-title" x="608.5" y="204">DeepGEMM</text>
+  <text class="sub" x="608.5" y="237">score production</text>
+  <path class="arrow" d="M762 209 H1017"/>
+  <text class="warn" x="890" y="184">dense Q×N GMEM</text>
+  <rect class="box" x="1041" y="162" width="336" height="94" rx="16"/>
+  <text class="box-title" x="1209" y="204">FlashInfer</text>
+  <text class="sub" x="1209" y="237">exact Top-K</text>
+  <path class="arrow" d="M1377 209 H1567"/>
+  <text class="indices" x="1593" y="218">indices</text>
+
+  <!-- Row 2 -->
+  <rect class="panel" x="45" y="320" width="1753" height="184" rx="28"/>
+  <text class="section" x="80" y="377">DeepGEMM + DeepSelect</text>
+  <rect class="box" x="455" y="369" width="307" height="94" rx="16"/>
+  <text class="box-title" x="608.5" y="411">DeepGEMM</text>
+  <text class="sub" x="608.5" y="444">score production</text>
+  <path class="arrow" d="M762 416 H1017"/>
+  <text class="warn" x="890" y="391">dense Q×N GMEM</text>
+  <rect class="box" x="1041" y="369" width="336" height="94" rx="16"/>
+  <text class="box-title" x="1209" y="411">DeepSelect</text>
+  <text class="sub" x="1209" y="444">exact Top-K</text>
+  <path class="arrow" d="M1377 416 H1567"/>
+  <text class="indices" x="1593" y="425">indices</text>
+
+  <!-- Row 3 -->
+  <rect class="panel" x="45" y="527" width="1753" height="221" rx="28"/>
+  <text class="section" x="80" y="584">FusedIndexTopK</text>
+  <rect x="432" y="561" width="944" height="108" rx="16" fill="url(#greenBox)" stroke="#35d05d" stroke-width="4"/>
+  <text class="green-title" x="904" y="609">Tensor-core score production + exact Top-K</text>
+  <text class="sub" x="904" y="645">same kernel · CTA-local candidates</text>
+  <path class="green-line" d="M1376 615 H1567"/>
+  <text class="indices" x="1593" y="624">indices</text>
+  <rect x="1372" y="663" width="404" height="68" rx="16" fill="url(#amberBox)" stroke="#e0a91b" stroke-width="4"/>
+  <text class="repair-text" x="1574" y="705">flagged rows: exact device repair</text>
+</svg>

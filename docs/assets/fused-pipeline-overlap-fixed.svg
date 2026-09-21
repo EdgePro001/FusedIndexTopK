@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
   "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-<svg xmlns:xlink="http://www.w3.org/1999/xlink" width="936pt" height="518.4pt" viewBox="0 0 936 518.4" xmlns="http://www.w3.org/2000/svg" version="1.1">
+<svg xmlns:xlink="http://www.w3.org/1999/xlink" width="936pt" height="585pt" viewBox="0 0 936 585" xmlns="http://www.w3.org/2000/svg" version="1.1">
  <title>Measured FusedIndexTopK TMA, Math, and TopK pipeline overlap</title>
  <metadata>
   <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
@@ -3150,4 +3150,57 @@ z
    <rect x="140.4" y="344.335238" width="772.2" height="96.304762"/>
   </clipPath>
  </defs>
+
+  <!-- Clean redraw of lower latency panel: data unchanged; layout spacing only -->
+  <g id="lower_panel_nonoverlap">
+    <rect x="0" y="308" width="936" height="277" fill="#ffffff"/>
+    <text x="140.4" y="331" fill="#263238" font-family="DejaVu Sans, Arial, sans-serif" font-size="13">(b) Measured exposed latency vs matched Math-only control</text>
+    <line x1="140.400000" y1="340" x2="140.400000" y2="474" stroke="#d6dce3" stroke-width="0.7" stroke-dasharray="2.6 1.1"/>
+    <line x1="140.400000" y1="474" x2="140.400000" y2="477.5" stroke="#66727d" stroke-width="0.8"/>
+    <text x="140.400000" y="491" text-anchor="middle" fill="#66727d" font-family="DejaVu Sans, Arial, sans-serif" font-size="10">0.0</text>
+    <line x1="235.877484" y1="340" x2="235.877484" y2="474" stroke="#d6dce3" stroke-width="0.7" stroke-dasharray="2.6 1.1"/>
+    <line x1="235.877484" y1="474" x2="235.877484" y2="477.5" stroke="#66727d" stroke-width="0.8"/>
+    <text x="235.877484" y="491" text-anchor="middle" fill="#66727d" font-family="DejaVu Sans, Arial, sans-serif" font-size="10">0.5</text>
+    <line x1="331.354969" y1="340" x2="331.354969" y2="474" stroke="#d6dce3" stroke-width="0.7" stroke-dasharray="2.6 1.1"/>
+    <line x1="331.354969" y1="474" x2="331.354969" y2="477.5" stroke="#66727d" stroke-width="0.8"/>
+    <text x="331.354969" y="491" text-anchor="middle" fill="#66727d" font-family="DejaVu Sans, Arial, sans-serif" font-size="10">1.0</text>
+    <line x1="426.832453" y1="340" x2="426.832453" y2="474" stroke="#d6dce3" stroke-width="0.7" stroke-dasharray="2.6 1.1"/>
+    <line x1="426.832453" y1="474" x2="426.832453" y2="477.5" stroke="#66727d" stroke-width="0.8"/>
+    <text x="426.832453" y="491" text-anchor="middle" fill="#66727d" font-family="DejaVu Sans, Arial, sans-serif" font-size="10">1.5</text>
+    <line x1="522.309937" y1="340" x2="522.309937" y2="474" stroke="#d6dce3" stroke-width="0.7" stroke-dasharray="2.6 1.1"/>
+    <line x1="522.309937" y1="474" x2="522.309937" y2="477.5" stroke="#66727d" stroke-width="0.8"/>
+    <text x="522.309937" y="491" text-anchor="middle" fill="#66727d" font-family="DejaVu Sans, Arial, sans-serif" font-size="10">2.0</text>
+    <line x1="617.787421" y1="340" x2="617.787421" y2="474" stroke="#d6dce3" stroke-width="0.7" stroke-dasharray="2.6 1.1"/>
+    <line x1="617.787421" y1="474" x2="617.787421" y2="477.5" stroke="#66727d" stroke-width="0.8"/>
+    <text x="617.787421" y="491" text-anchor="middle" fill="#66727d" font-family="DejaVu Sans, Arial, sans-serif" font-size="10">2.5</text>
+    <line x1="713.264906" y1="340" x2="713.264906" y2="474" stroke="#d6dce3" stroke-width="0.7" stroke-dasharray="2.6 1.1"/>
+    <line x1="713.264906" y1="474" x2="713.264906" y2="477.5" stroke="#66727d" stroke-width="0.8"/>
+    <text x="713.264906" y="491" text-anchor="middle" fill="#66727d" font-family="DejaVu Sans, Arial, sans-serif" font-size="10">3.0</text>
+    <line x1="808.742390" y1="340" x2="808.742390" y2="474" stroke="#d6dce3" stroke-width="0.7" stroke-dasharray="2.6 1.1"/>
+    <line x1="808.742390" y1="474" x2="808.742390" y2="477.5" stroke="#66727d" stroke-width="0.8"/>
+    <text x="808.742390" y="491" text-anchor="middle" fill="#66727d" font-family="DejaVu Sans, Arial, sans-serif" font-size="10">3.5</text>
+    <line x1="904.219874" y1="340" x2="904.219874" y2="474" stroke="#d6dce3" stroke-width="0.7" stroke-dasharray="2.6 1.1"/>
+    <line x1="904.219874" y1="474" x2="904.219874" y2="477.5" stroke="#66727d" stroke-width="0.8"/>
+    <text x="904.219874" y="491" text-anchor="middle" fill="#66727d" font-family="DejaVu Sans, Arial, sans-serif" font-size="10">4.0</text>
+    <line x1="140.4" y1="474" x2="904.219874" y2="474" stroke="#263238" stroke-width="0.8"/>
+    <text x="132" y="358" text-anchor="end" fill="#263238" font-family="DejaVu Sans, Arial, sans-serif" font-size="10">Replay A  Math-only</text>
+    <text x="132" y="388" text-anchor="end" fill="#263238" font-family="DejaVu Sans, Arial, sans-serif" font-size="10">Replay A  Fused</text>
+    <text x="132" y="430" text-anchor="end" fill="#263238" font-family="DejaVu Sans, Arial, sans-serif" font-size="10">Replay B  Math-only</text>
+    <text x="132" y="460" text-anchor="end" fill="#263238" font-family="DejaVu Sans, Arial, sans-serif" font-size="10">Replay B  Fused</text>
+    <rect x="140.4" y="348" width="674.452949" height="12" fill="#6c5ce7" stroke="#263238" stroke-width="0.75"/>
+    <rect x="140.4" y="378" width="674.452949" height="12" fill="#6c5ce7" stroke="#263238" stroke-width="0.75"/>
+    <rect x="814.852949" y="378" width="21.196002" height="12" fill="#f2994a" stroke="#263238" stroke-width="0.75"/>
+    <rect x="140.4" y="420" width="669.870029" height="12" fill="#6c5ce7" stroke="#263238" stroke-width="0.75"/>
+    <rect x="140.4" y="450" width="669.870029" height="12" fill="#6c5ce7" stroke="#263238" stroke-width="0.75"/>
+    <rect x="810.270029" y="450" width="21.959821" height="12" fill="#f2994a" stroke="#263238" stroke-width="0.75"/>
+    <text x="809.852949" y="357" text-anchor="end" fill="#ffffff" font-family="DejaVu Sans, Arial, sans-serif" font-size="8.5" font-weight="700">3.532 ms</text>
+    <text x="805.270029" y="429" text-anchor="end" fill="#ffffff" font-family="DejaVu Sans, Arial, sans-serif" font-size="8.5" font-weight="700">3.508 ms</text>
+    <text x="791.852949" y="373" fill="#a85d08" font-family="DejaVu Sans, Arial, sans-serif" font-size="8.5">+111 µs (3.0%)</text>
+    <text x="787.270029" y="445" fill="#a85d08" font-family="DejaVu Sans, Arial, sans-serif" font-size="8.5">+115 µs (3.2%)</text>
+    <text x="843.048950" y="387" fill="#263238" font-family="DejaVu Sans, Arial, sans-serif" font-size="8.5">3.643 ms</text>
+    <text x="839.229851" y="459" fill="#263238" font-family="DejaVu Sans, Arial, sans-serif" font-size="8.5">3.623 ms</text>
+    <text x="522" y="510" text-anchor="middle" fill="#263238" font-family="DejaVu Sans, Arial, sans-serif" font-size="10">Median kernel latency (ms, lower is better)</text>
+    <text x="912" y="548" text-anchor="end" fill="#66727d" font-family="DejaVu Sans, Arial, sans-serif" font-size="8.5">H20 · Q=4096 · N=16384 · K=2048 · held-out real-corpus replay · 48 paired trials per fixture</text>
+    <text x="912" y="564" text-anchor="end" fill="#66727d" font-family="DejaVu Sans, Arial, sans-serif" font-size="8.5">Upper: instrumented clock64 trace; lower: non-diagnostic hot-cache timing. Sampling and repair excluded.</text>
+  </g>
 </svg>
