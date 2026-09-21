@@ -34,7 +34,7 @@ and three warps to exact Top-K. Double-buffered candidate slots and ready/free
 barriers let math produce query pair `i` while Top-K consumes pair `i - 1`;
 TMA continues feeding the math pipeline independently.
 
-![Measured TMA, math, and Top-K overlap inside the persistent fused kernel](docs/assets/fused-pipeline-overlap.svg)
+![Measured TMA, math, and Top-K overlap inside the persistent fused kernel](docs/assets/fused-pipeline-overlap-fixed.svg)
 
 This figure is drawn to scale from an H20 run at `Q=4096`, `N=16384`, and
 `K=2048` using held-out real-corpus replay. The upper panel shows five measured
@@ -57,7 +57,7 @@ that Top-K is an isolated serial stage. The compact measurements and trace
 qualification are available in
 [the pipeline evidence JSON](results/fused-index-topk-pipeline-overlap-h20.json).
 
-![Execution-path comparison for DeepGEMM plus FlashInfer, DeepGEMM plus DeepSelect, and FusedIndexTopK](docs/assets/execution-paths.svg)
+![Execution-path comparison for DeepGEMM plus FlashInfer, DeepGEMM plus DeepSelect, and FusedIndexTopK](docs/assets/execution-paths-fixed.svg)
 
 | Property | DeepGEMM + FlashInfer | DeepGEMM + DeepSelect | FusedIndexTopK |
 |---|---|---|---|
