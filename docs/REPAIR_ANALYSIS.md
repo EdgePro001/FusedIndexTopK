@@ -6,10 +6,10 @@ proved complete within its bounded on-chip resources.
 
 ## Fast overflow handling
 
-Long-context kernels first keep candidates in shared memory. Small overflow is
-preserved in an `8 × 256` packed-pair workspace per row and merged by the
-Top-K consumer. This avoids rescanning the key sequence and repeating the GEMM
-for ordinary threshold variance.
+The unified kernel first keeps candidates in shared memory. Small overflow is
+preserved in an `8 × 256` packed-pair workspace per row and merged by the Top-K
+consumer. This avoids rescanning the key sequence and repeating the GEMM for
+ordinary threshold variance.
 
 The workspace is bounded. If it is insufficient, or if the candidate set is
 otherwise unsafe, the row is flagged instead of returning an approximation.

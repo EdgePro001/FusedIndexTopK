@@ -19,7 +19,7 @@ from fused_index_topk.provenance import path_fingerprint
 from fused_index_topk.variants.common import supports_frozen_deepgemm_case
 
 from .long_repair import load_long_context_repair
-from .onchip_producer import load_long_producer, load_short_producer
+from .onchip_producer import load_long_producer
 from .repair_producer import load_repair_producer
 from .sampling import (
     common_random_sample_ids,
@@ -54,6 +54,16 @@ def long_context_sample_elements(context_tokens: int) -> int:
     return min(context_tokens, samples)
 
 
+def production_sample_elements(context_tokens: int) -> int:
+    """Return the qualified threshold-sampling size for a supported context."""
+
+    if context_tokens == _REPAIR_CHUNK_ELEMENTS:
+        return 256
+    if context_tokens < _REPAIR_CHUNK_ELEMENTS:
+        return 512
+    return long_context_sample_elements(context_tokens)
+
+
 class FusedIndexTopK:
     """Same-kernel GEMM/Top-K with bounded exact device-side repair."""
 
@@ -61,7 +71,7 @@ class FusedIndexTopK:
         plugin_id="fused_index_topk",
         display_name="FusedIndexTopK",
         api_version="1.0",
-        implementation_version="2.1.0",
+        implementation_version="2.2.0",
         mode="fused",
         description=(
             "Same-kernel DeepGEMM-style score production and exact Top-K with "
@@ -69,7 +79,7 @@ class FusedIndexTopK:
         ),
         implementation="project-local-deepgemm-derivative+custom-cuda-radix",
         exact_topk=True,
-        source_revision="fused-index-topk-v2.1",
+        source_revision="fused-index-topk-v2.2",
         tags=(
             "prefill",
             "sm90",
@@ -158,19 +168,14 @@ class FusedIndexTopK:
 
         verbose = bool(self.options.get("verbose_build", False))
         sampling = load_sampling_extension(verbose=verbose)
-        short_context = case.context_tokens == _REPAIR_CHUNK_ELEMENTS
-        producer_loader = load_short_producer if short_context else load_long_producer
-        fast_producer = producer_loader(deep_gemm, verbose=verbose)
+        fast_producer = load_long_producer(deep_gemm, verbose=verbose)
         chunk_producer = load_repair_producer(deep_gemm, verbose=verbose)
         long_repair = load_long_context_repair(verbose=verbose)
 
         rows = case.query_tokens
-        if short_context:
-            sample_elements = 256
-        elif case.context_tokens < _REPAIR_CHUNK_ELEMENTS:
-            sample_elements = 512
-        else:
-            sample_elements = long_context_sample_elements(case.context_tokens)
+        # Preserve the qualified 16K sampling schedule while using the unified
+        # bounded-overflow producer for every supported N.
+        sample_elements = production_sample_elements(case.context_tokens)
         sample_rank = guarded_sample_rank(
             sample_elements,
             case.context_tokens,
@@ -197,8 +202,11 @@ class FusedIndexTopK:
 
         output_ids = torch.empty((rows, _TOP_K), device=inputs.q.device, dtype=torch.int32)
         failure_flags = torch.empty(rows, device=inputs.q.device, dtype=torch.uint8)
-        spill_shape = (0,) if short_context else (rows, _SPILL_SEGMENTS, _SPILL_PER_SEGMENT)
-        spill_pairs = torch.empty(spill_shape, device=inputs.q.device, dtype=torch.int64)
+        spill_pairs = torch.empty(
+            (rows, _SPILL_SEGMENTS, _SPILL_PER_SEGMENT),
+            device=inputs.q.device,
+            dtype=torch.int64,
+        )
 
         trace = torch.zeros(
             (rows // 2, 64) if self.diagnostic else (0,), device=inputs.q.device, dtype=torch.int64
@@ -300,10 +308,7 @@ class FusedIndexTopK:
                 self.diagnostic,
                 trace,
             )
-            if short_context:
-                fast_producer.fp8_mqa_topk_out(*arguments)
-            else:
-                fast_producer.fp8_mqa_topk_out(*arguments, spill_pairs)
+            fast_producer.fp8_mqa_topk_out(*arguments, spill_pairs)
             artifacts["fast_failure_flags"] = failure_flags
             artifacts["fast_indices"] = output_ids.unsqueeze(1)
             artifacts["phase_trace"] = trace
@@ -409,11 +414,7 @@ class FusedIndexTopK:
                     produces=("fast_failure_flags", "fast_indices"),
                     semantic_ops=("indexer", "topk", "output"),
                     description="GEMM and exact TopK in CTA SMEM; lossless segment-relative IDs",
-                    kernel_regexes=(
-                        "itk_fused_index_topk_short"
-                        if short_context
-                        else "itk_fused_index_topk_long",
-                    ),
+                    kernel_regexes=("itk_fused_index_topk_long",),
                 ),
                 run_fused_topk,
             ),
@@ -452,7 +453,7 @@ class FusedIndexTopK:
                 "sampling_granularity": "individual-random-token",
                 "dense_logits_materialized": False,
                 "candidate_capacity": _FAST_CANDIDATE_CAPACITY,
-                "candidate_segments": 16 if short_context else 8,
+                "candidate_segments": 8,
                 "device_failure_flags": True,
                 "timed_failure_repair": True,
                 "repair_dispatch": "device-mask-no-host-sync",
@@ -461,7 +462,7 @@ class FusedIndexTopK:
                 "repair_merge": "online-exact-top2048-pairs",
                 "repair_workspace_bounded_in_n": True,
                 "normal_candidate_gmem_bytes": 0,
-                "spill_capacity_per_segment": 0 if short_context else _SPILL_PER_SEGMENT,
+                "spill_capacity_per_segment": _SPILL_PER_SEGMENT,
                 "spill_workspace_bytes": spill_pairs.numel() * spill_pairs.element_size(),
                 "spill_merge": "same-CTA-consumer-with-next-Q-math-overlap",
                 "same_kernel_exact_topk": True,

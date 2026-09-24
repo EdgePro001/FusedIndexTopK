@@ -1,6 +1,27 @@
 # Results
 
-## Release result
+## Version 2.2 integration gate
+
+Version 2.2 removes the dedicated 16K implementation and routes the complete
+8K--160K qualification range through the unified eight-segment kernel. The 16K
+sample remains fixed at 256 tokens so this gate isolates that kernel change.
+
+| 16K replay split | v2.1 short control | v2.2 unified kernel | CUPTI change | CUDA Event change |
+|---|---:|---:|---:|---:|
+| normal | 3.770 ms | 3.761 ms | -0.23% | -0.19% |
+| hard | 3.769 ms | 3.764 ms | -0.13% | -0.06% |
+
+The measurement used two formal runs in reversed execution order for each
+implementation and split. Each run used 10 warmups, 20 CUDA Event trials,
+30 CUPTI trials, and an 8 GB L2 scrub. The four real-corpus fixtures produced
+zero fast failures, unresolved failures, mismatches, or duplicate outputs.
+This establishes performance parity for the replaced 16K path; it does not
+claim a meaningful speedup from consolidation.
+
+Machine-readable measurements and source identities are in
+[fused-index-topk-unified-kernel-h20-v2.2.json](../results/fused-index-topk-unified-kernel-h20-v2.2.json).
+
+## Version 2.1 full campaign
 
 FusedIndexTopK 2.1.0 passed all 120 exactness checks in the real-corpus H20
 campaign. Against the pinned DeepGEMM + DeepSelect baseline, it won 116 of 120

@@ -27,24 +27,19 @@ Math warp groups produce score tiles with the pinned DeepGEMM-compatible SM90
 pipeline. A CTA-local consumer performs four-byte radix selection on ordered
 FP32 score bits and writes the final `K = 2048` indices directly.
 
-For `N = 16384`, the short-context layout uses:
-
-- 16 candidate segments
-- 5,888 total candidate slots
-- 228,288 bytes of configured shared memory
-- no spill workspace
-
-For `N = 8192` and `N > 16384`, the long-context layout uses:
+Every qualified context from `N = 8192` through `N = 163840` uses one unified
+bounded-overflow layout:
 
 - 8 candidate segments
 - 16-bit segment-relative candidate indices
 - 5,888 shared-memory candidate slots
 - a bounded `8 × 256` packed-pair spill per row
 
-The segment-relative representation remains lossless through the qualified
-`N = 163840` limit. The spill is consumed by the same CTA and can overlap
-with subsequent math tiles. Dense scores and the normal candidate list are
-never written to global memory.
+The segment-relative representation remains lossless throughout that range.
+At `N = 16384`, the operator retains the separately qualified 256-token sample
+schedule; only the main-kernel layout is unified. The spill is consumed by the
+same CTA and can overlap with subsequent math tiles. Dense scores and the normal
+candidate list are never written to global memory.
 
 ## Exactness
 
@@ -70,7 +65,7 @@ one kernel. It does not mean that every byte in the complete graph lives in
 shared memory:
 
 - the sampled prepass is a separate launch;
-- long-context overflow may use the bounded spill workspace;
+- candidate overflow may use the bounded spill workspace;
 - flagged rows use a separate exact repair graph;
 - final indices are written to global memory.
 

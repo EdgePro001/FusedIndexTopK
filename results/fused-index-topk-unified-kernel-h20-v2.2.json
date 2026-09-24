@@ -1,0 +1,82 @@
+{
+  "artifact": "fused-index-topk-unified-kernel-h20-v2.2",
+  "schema_version": 1,
+  "date": "2026-09-24",
+  "change": {
+    "control": "v2.1 dedicated 16K short kernel",
+    "candidate": "v2.2 unified eight-segment bounded-overflow kernel",
+    "preserved_16k_sample_elements": 256,
+    "removed_cuda_translation_units": [
+      "short_fused_bindings.cpp",
+      "short_fused_topk.cuh",
+      "short_cta_topk.cuh"
+    ]
+  },
+  "workload": {
+    "gpu": "NVIDIA H20-3e",
+    "query_tokens": 4096,
+    "context_tokens": 16384,
+    "top_k": 2048,
+    "input": "held-out DeepSeek V3.2 real-corpus replay",
+    "manifest_sha256": "63330f89a412e94b8e9986647290124a9082897c8af3f865748309b3663ac232"
+  },
+  "protocol": {
+    "independent_runs_per_implementation_and_split": 2,
+    "execution_order": [
+      "control_then_candidate",
+      "candidate_then_control"
+    ],
+    "warmup_iterations_per_run": 10,
+    "cuda_event_trials_per_run": 20,
+    "cupti_trials_per_run": 30,
+    "l2_scrub_bytes": 8000000000
+  },
+  "source_identity": {
+    "control_git_commit": "e79dfe0",
+    "control_candidate_sha256": "44349be32e663f570952dbc52be360146d71cea61cda8d97dd75c17b2bad24ff",
+    "unified_candidate_sha256": "440a969aa4a39649078c298a76b2c8cc93fbc7a45fe0d573fcc644781906259b",
+    "framework_sha256": "d29cb0e40e7d081ddea3828ead4fc46d6f58f20a564ec17f9919c1d1060b46bd"
+  },
+  "results": [
+    {
+      "split": "test_normal",
+      "control_cupti_median_ms": 3.7702125,
+      "unified_cupti_median_ms": 3.761476,
+      "cupti_change_percent": -0.2317,
+      "control_cuda_event_median_ms": 3.78410395,
+      "unified_cuda_event_median_ms": 3.77695998,
+      "cuda_event_change_percent": -0.1888,
+      "control_fused_kernel_median_ms": 3.633061,
+      "unified_fused_kernel_median_ms": 3.624764,
+      "fused_kernel_change_percent": -0.2284
+    },
+    {
+      "split": "test_hard",
+      "control_cupti_median_ms": 3.76903625,
+      "unified_cupti_median_ms": 3.76426025,
+      "cupti_change_percent": -0.1267,
+      "control_cuda_event_median_ms": 3.77755198,
+      "unified_cuda_event_median_ms": 3.77544796,
+      "cuda_event_change_percent": -0.0557,
+      "control_fused_kernel_median_ms": 3.632421,
+      "unified_fused_kernel_median_ms": 3.627548,
+      "fused_kernel_change_percent": -0.1341
+    }
+  ],
+  "validation": {
+    "splits": [
+      "test_normal",
+      "test_hard"
+    ],
+    "fixtures_per_split": [
+      "A",
+      "B"
+    ],
+    "fast_failure_rows": 0,
+    "unresolved_failure_rows": 0,
+    "value_mismatch_rows": 0,
+    "duplicate_output_rows": 0,
+    "status": "passed"
+  },
+  "conclusion": "The dedicated 16K kernel can be removed without a measurable latency regression; the unified kernel was marginally faster in both measured splits."
+}

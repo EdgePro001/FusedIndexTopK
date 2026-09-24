@@ -12,10 +12,6 @@ from fused_index_topk.provenance import path_fingerprint
 _ROOT = Path(__file__).resolve().parent
 _CSRC = _ROOT / "csrc"
 _IMPLEMENTATIONS = {
-    "short": (
-        _CSRC / "short_fused_bindings.cpp",
-        _CSRC / "include" / "fused_index_topk" / "short_fused_topk.cuh",
-    ),
     "long": (
         _CSRC / "long_fused_bindings.cpp",
         _CSRC / "include" / "fused_index_topk" / "long_fused_topk.cuh",
@@ -151,13 +147,7 @@ def _load(kind: str, deep_gemm: Any, *, verbose: bool) -> Any:
     return extension
 
 
-def load_short_producer(deep_gemm: Any, *, verbose: bool = False) -> Any:
-    """Load the fixed-16K same-kernel implementation."""
-
-    return _load("short", deep_gemm, verbose=verbose)
-
-
 def load_long_producer(deep_gemm: Any, *, verbose: bool = False) -> Any:
-    """Load the bounded-overflow implementation for 8K--160K contexts."""
+    """Load the unified bounded-overflow implementation for 8K--160K."""
 
     return _load("long", deep_gemm, verbose=verbose)

@@ -16,14 +16,14 @@ The current release targets:
 
 The main kernel combines tensor-core score production, threshold filtering,
 candidate collection, radix selection, and final result emission. Candidates
-remain in CTA shared memory. Long-context execution has a small bounded spill
-workspace; the consumer merges that spill while later math work is still in
-flight. A separate sampled-GEMM prepass estimates the threshold, and a
-device-masked exact repair path handles the uncommon rows that fail the fast
-path.
+remain in CTA shared memory. Every supported context uses the same eight-segment
+layout and a small bounded spill workspace; the consumer merges that spill while
+later math work is still in flight. A separate sampled-GEMM prepass estimates
+the threshold, and a device-masked exact repair path handles the uncommon rows
+that fail the fast path.
 
 The normal path therefore has zero dense-score traffic and no full candidate
-list in global memory. Long-context overflow may use only the bounded spill
+list in global memory. Candidate overflow may use only the bounded spill
 described in [Architecture](docs/ARCHITECTURE.md) and
 [Repair analysis](docs/REPAIR_ANALYSIS.md).
 
@@ -36,8 +36,10 @@ TMA continues feeding the math pipeline independently.
 
 ![Measured TMA, math, and Top-K overlap inside the persistent fused kernel](docs/assets/fused-pipeline-overlap-fixed.svg)
 
-This figure is drawn to scale from an H20 run at `Q=4096`, `N=16384`, and
-`K=2048` using held-out real-corpus replay. The upper panel shows five measured
+This figure is drawn to scale from an H20 v2.1 run at `Q=4096`, `N=16384`, and
+`K=2048` using held-out real-corpus replay. The v2.2 kernel keeps the same
+TMA/math/Top-K pipeline while replacing the separate 16K candidate layout with
+the unified layout described below. The upper panel shows five measured
 steady-state iterations from one persistent CTA; unequal block widths are the
 observed `clock64` intervals. Across the complete steady-state trace, **92.6%**
 of Top-K time overlaps TMA scheduling and/or tensor-core math. Median phase
@@ -69,6 +71,31 @@ qualification are available in
 
 ## H20 results
 
+### v2.2 unified-kernel integration gate
+
+Version 2.2 removes the separate 16K CUDA implementation. Every qualified
+context from 8K through 160K now dispatches to the same eight-segment,
+bounded-overflow kernel. The qualified 16K sampling schedule remains 256 tokens,
+so the comparison below isolates the main-kernel consolidation.
+
+| 16K replay split | v2.1 short control | v2.2 unified kernel | CUPTI change | CUDA Event change |
+|---|---:|---:|---:|---:|
+| normal | 3.770 ms | 3.761 ms | -0.23% | -0.19% |
+| hard | 3.769 ms | 3.764 ms | -0.13% | -0.06% |
+
+Values are medians of two independent formal runs per implementation and split,
+with the execution order reversed for the second run. Each run used 10 warmups,
+20 CUDA Event trials, 30 CUPTI trials, and an 8 GB L2 scrub on the same H20.
+All four real-corpus fixtures were exact, with zero fast-path failure rows. The
+result supports a performance-parity conclusion (slightly faster in these
+measurements), not a material speedup claim. Compact evidence is in
+[the v2.2 unification artifact](results/fused-index-topk-unified-kernel-h20-v2.2.json).
+
+The unified spill allocation costs 16 KiB per query row (64 MiB at `Q=4096`),
+but generates traffic only when a segment actually overflows.
+
+### v2.1 full campaign
+
 The published campaign used 120 native-length, held-out real-corpus cases:
 five model layers, two difficulty splits, two fixtures per split, and six
 context lengths. Every case matched an independent exact reference.
@@ -93,7 +120,7 @@ Two independently qualified baseline tracks are available:
 
 | Baseline track | Workload and implementation generation | Evidence |
 |---|---|---|
-| DeepGEMM + DeepSelect | current 2.1.0; real corpus, 8K–160K | 116/120 wins overall; 80/80 at 16K–128K |
+| DeepGEMM + DeepSelect | v2.1.0; real corpus, 8K–160K | 116/120 wins overall; 80/80 at 16K–128K |
 | DeepGEMM + FlashInfer | previous short-context release; real corpus, 6K–16K | 40/40 wins; median CUPTI reduction 14.71% |
 | DeepGEMM + FlashInfer | previous long-context development run; layer 0, 32K–128K | six of six cells faster by 4.87%–7.77% |
 
