@@ -17,7 +17,7 @@ constexpr int kPackedSmemBytes = 228160;
 class Runtime final : public LaunchRuntime<Runtime> {
 public:
     struct Args {
-        int seq_len, seq_len_kv, mode, tuning, math_schedule, math_registers;
+        int seq_len, seq_len_kv, mode, block_q, tuning, math_schedule, math_registers;
         bool diagnostic, cache_weights;
         int64_t* trace;
         uint64_t* spill;
@@ -46,10 +46,10 @@ static_assert(84608 + 2 * sizeof(SelectionScratch<4096>) == 217920);
 static_assert(84608 + 2 * sizeof(SelectionScratch<5888>) == 228160);
 static void __instantiate_kernel() {{
     auto ptr = reinterpret_cast<void*>(&itk_fused_index_topk_long<
-        64, 128, 2, 128, {}, 3, 128, 256, 2048, {}, {}, {}>);
+        64, 128, {}, 128, {}, 3, 128, 256, 2048, {}, {}, {}>);
 }}
 )", args.tuning, args.diagnostic ? 1 : 0, args.math_schedule, args.math_registers,
-        args.cache_weights ? 1 : 0, header, args.mode == 0 ? 3 : 2,
+        args.cache_weights ? 1 : 0, header, args.block_q, args.mode == 0 ? 3 : 2,
         args.mode == 0 ? 7680 : (args.mode >= 3 ? 5888 : 4096),
         args.mode == 0 ? 1 : 2, (args.mode == 2 or args.mode == 4) ? "true" : "false");
     }
@@ -102,10 +102,11 @@ void fp8_mqa_topk_out(
         const torch::Tensor& kv_scales, const torch::Tensor& weights,
         const torch::Tensor& start, const torch::Tensor& end,
         const torch::Tensor& thresholds, const torch::Tensor& output,
-        const torch::Tensor& failures, int mode, int debug_ctas,
+        const torch::Tensor& failures, int mode, int block_q, int debug_ctas,
         int tuning, int math_schedule, int math_registers, bool cache_weights,
         bool diagnostic, const torch::Tensor& trace, const torch::Tensor& spill) {
     DG_HOST_ASSERT(mode == 4); // Lossless segment-relative 16-bit IDs, not truncated global IDs.
+    DG_HOST_ASSERT(block_q == 1 or block_q == 2);
     DG_HOST_ASSERT(tuning >= 0 and tuning <= 7);
     DG_HOST_ASSERT(math_schedule == 1 or math_schedule == 2);
     DG_HOST_ASSERT(math_registers >= 168 and math_registers <= 216 and math_registers % 8 == 0);
@@ -117,11 +118,11 @@ void fp8_mqa_topk_out(
         (mode >= 3 ? kPackedSmemBytes : kCompactSmemBytes);
     const auto& [rows, heads, dim] = get_shape<3>(q);
     const auto& [columns, kv_dim] = get_shape<2>(kv);
-    DG_HOST_ASSERT(rows > 0 and rows % 2 == 0);
+    DG_HOST_ASSERT(rows > 0 and rows % block_q == 0);
     DG_HOST_ASSERT(trace.is_cuda() and trace.is_contiguous());
     DG_HOST_ASSERT(trace.get_device() == q.get_device());
     DG_HOST_ASSERT(trace.scalar_type() == torch::kLong);
-    DG_HOST_ASSERT(trace.numel() == (diagnostic ? rows / 2 * 64 : 0));
+    DG_HOST_ASSERT(trace.numel() == (diagnostic ? rows / block_q * 64 : 0));
     DG_HOST_ASSERT(spill.is_cuda() and spill.is_contiguous());
     DG_HOST_ASSERT(spill.get_device() == q.get_device());
     DG_HOST_ASSERT(spill.scalar_type() == torch::kLong);
@@ -155,6 +156,7 @@ void fp8_mqa_topk_out(
         .seq_len = rows,
         .seq_len_kv = columns,
         .mode = mode,
+        .block_q = block_q,
         .tuning = tuning,
         .math_schedule = math_schedule,
         .math_registers = math_registers,
@@ -167,11 +169,11 @@ void fp8_mqa_topk_out(
         .thresholds = thresholds.data_ptr<float>(),
         .output = output.data_ptr<int>(),
         .failures = failures.data_ptr<uint8_t>(),
-        .q_map = make_tma_2d_desc(q, dim, rows * heads, dim, 2 * heads, dim, dim),
+        .q_map = make_tma_2d_desc(q, dim, rows * heads, dim, block_q * heads, dim, dim),
         .kv_map = make_tma_2d_desc(kv, dim, columns, dim, 128, dim, dim),
         .scales_map = make_tma_2d_desc(
             kv_scales, get_tma_aligned_size(columns, 4), 1, 128, 1, 0, 0),
-        .weights_map = make_tma_2d_desc(weights, heads, rows, heads, 2, heads, 0),
+        .weights_map = make_tma_2d_desc(weights, heads, rows, heads, block_q, heads, 0),
         .launch_args = LaunchArgs(num_ctas, 384, smem_bytes),
     };
     const auto code = Runtime::generate(args);

@@ -36,10 +36,25 @@ def test_public_registry_exposes_one_fused_operator() -> None:
 
 def test_final_operator_supports_qualified_contexts_with_one_kernel() -> None:
     plugin = create_variant()
+    assert plugin.block_q == 1
     for context in (8192, 12288, 16384, 32768, 65536, 131072, 163840):
         assert plugin.supports(_case(context))
     for context in (6144, 163968, 262144):
         assert not plugin.supports(_case(context))
+
+
+def test_block_q_two_remains_an_explicit_control() -> None:
+    plugin = create_variant({"block_q": 2})
+    assert plugin.block_q == 2
+    assert plugin.supports(_case(16384))
+
+
+def test_q1_default_does_not_expand_the_repair_contract_to_odd_queries() -> None:
+    odd = PrefillCase(
+        case_id="odd-query-control", query_tokens=63,
+        context_tokens=8192, top_k=2048, seed=1,
+    )
+    assert not create_variant().supports(odd)
 
 
 def test_long_context_sample_schedule() -> None:

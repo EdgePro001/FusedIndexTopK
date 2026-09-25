@@ -71,7 +71,7 @@ class FusedIndexTopK:
         plugin_id="fused_index_topk",
         display_name="FusedIndexTopK",
         api_version="1.0",
-        implementation_version="2.2.0",
+        implementation_version="2.3.0-rc1",
         mode="fused",
         description=(
             "Same-kernel DeepGEMM-style score production and exact Top-K with "
@@ -79,7 +79,7 @@ class FusedIndexTopK:
         ),
         implementation="project-local-deepgemm-derivative+custom-cuda-radix",
         exact_topk=True,
-        source_revision="fused-index-topk-v2.2",
+        source_revision="fused-index-topk-v2.3-q1-rc1",
         tags=(
             "prefill",
             "sm90",
@@ -99,6 +99,7 @@ class FusedIndexTopK:
             "sample_guard_sigmas",
             "debug_ctas",
             "diagnostic",
+            "block_q",
         }
         unknown = set(self.options) - allowed
         if unknown:
@@ -118,6 +119,11 @@ class FusedIndexTopK:
         self.diagnostic = self.options.get("diagnostic", False)
         if type(self.diagnostic) is not bool:
             raise ValueError("diagnostic must be bool")
+        # Q1 is the measured winner over Q2 on the qualified real-replay grid.
+        # Keep Q2 selectable for ablations and for shapes not yet qualified.
+        self.block_q = self.options.get("block_q", 1)
+        if type(self.block_q) is not int or self.block_q not in (1, 2):
+            raise ValueError("block_q must be 1 or 2")
         self.tuning = 6
         self.math_schedule = 2
         self.math_registers = 184
@@ -129,7 +135,9 @@ class FusedIndexTopK:
             and 8192 <= case.context_tokens <= _MAX_CONTEXT
             and case.context_tokens % 128 == 0
             and case.top_k == _TOP_K
+            # The exact repair producer still has a two-row launch contract.
             and case.query_tokens % 2 == 0
+            and case.query_tokens % self.block_q == 0
         )
 
     def fingerprint_metadata(self) -> Mapping[str, Any]:
@@ -146,6 +154,7 @@ class FusedIndexTopK:
             "candidate_segments": 8,
             "max_context": _MAX_CONTEXT,
             "candidate_capacity": 5888,
+            "block_q": self.block_q,
             "fused_smem_bytes": 228160,
             "timed_repair": True,
             "repair_host_sync": False,
@@ -209,7 +218,7 @@ class FusedIndexTopK:
         )
 
         trace = torch.zeros(
-            (rows // 2, 64) if self.diagnostic else (0,), device=inputs.q.device, dtype=torch.int64
+            (rows // self.block_q, 64) if self.diagnostic else (0,), device=inputs.q.device, dtype=torch.int64
         )
 
         repair_candidate_pairs = torch.empty(
@@ -300,6 +309,7 @@ class FusedIndexTopK:
                 output_ids,
                 failure_flags,
                 4,
+                self.block_q,
                 self.debug_ctas,
                 self.tuning,
                 self.math_schedule,

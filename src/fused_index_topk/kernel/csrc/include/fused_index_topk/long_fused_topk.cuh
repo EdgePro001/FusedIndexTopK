@@ -102,9 +102,9 @@ void ITK_LONG_KERNEL_NAME(
                      (kNumQStages == 2 or kNumQStages == 3) and kNumKVStages == 3,
                      "long-context fused TopK requires Q stages 2/3 and KV stages 3");
     DG_STATIC_ASSERT(
-        BLOCK_Q == 2 and
+        (BLOCK_Q == 1 or BLOCK_Q == 2) and
         BLOCK_KV == 128 and kNumMathThreads == 256,
-        "long-context fused TopK requires [2,128]/256");
+        "long-context fused TopK requires BLOCK_Q in {1,2}, BLOCK_KV=128, and 256 math threads");
     DG_STATIC_ASSERT(TOP_K == 2048, "long-context fused TopK requires exact Top-2048");
     DG_STATIC_ASSERT((CANDIDATE_CAPACITY == 7680 and kNumQStages == 3 and kCandidateSlots == 1 and not kOverlap) or
                      ((CANDIDATE_CAPACITY == 4096 or CANDIDATE_CAPACITY == 5888) and kNumQStages == 2 and kCandidateSlots == 2),
@@ -268,6 +268,8 @@ void ITK_LONG_KERNEL_NAME(
                         spill_pairs + static_cast<uint64_t>(row) * kSpillPerRow);
                 }
                 phase_stamp(trace, 6, tid == 0);
+                if constexpr (ITK_LONG_DIAGNOSTIC)
+                    if (tid == 0) trace[7] = phase_global_clock();
                 // All 96 consumers release after their final SMEM reads.
                 candidate_free[slot].arrive();
                 CUTE_TIE(get_next_block_q_idx(), block_q_idx, q_iter_idx);
@@ -338,6 +340,14 @@ void ITK_LONG_KERNEL_NAME(
             int64_t* trace = nullptr;
             if constexpr (ITK_LONG_DIAGNOSTIC) trace = phase_trace + block_q_idx * 64;
             phase_stamp(trace, 0, thread_idx == 0);
+            if constexpr (ITK_LONG_DIAGNOSTIC) {
+                if (thread_idx == 0) {
+                    uint32_t smid;
+                    asm volatile("mov.u32 %0, %%smid;" : "=r"(smid));
+                    trace[13] = smid;
+                    trace[14] = phase_global_clock();
+                }
+            }
             // Initial free phase is zero, so waiting on phase one admits the
             // first use; subsequent uses wait for the preceding consumer.
             candidate_free[candidate_slot].wait(candidate_phase ^ 1);
@@ -645,6 +655,8 @@ void ITK_LONG_KERNEL_NAME(
             // memory accesses within this CTA, not just the barrier's SMEM.
             // Row-owned spill slices cannot alias the next Q pair's writes.
             phase_stamp(trace, 3, thread_idx == 0);
+            if constexpr (ITK_LONG_DIAGNOSTIC)
+                if (thread_idx == 0) trace[15] = phase_global_clock();
             candidate_ready[candidate_slot].arrive();
             if constexpr (not kOverlap)
                 candidate_free[candidate_slot].wait(candidate_phase);

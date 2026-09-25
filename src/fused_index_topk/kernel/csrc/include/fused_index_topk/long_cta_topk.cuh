@@ -17,6 +17,12 @@ __device__ __forceinline__ uint64_t phase_clock() {
     if constexpr (ITK_LONG_DIAGNOSTIC) return clock64();
     return 0;
 }
+__device__ __forceinline__ uint64_t phase_global_clock() {
+    uint64_t result = 0;
+    if constexpr (ITK_LONG_DIAGNOSTIC)
+        asm volatile("mov.u64 %0, %%globaltimer;" : "=l"(result));
+    return result;
+}
 __device__ __forceinline__ void phase_stamp(int64_t* trace, int field, bool leader) {
     if constexpr (ITK_LONG_DIAGNOSTIC)
         if (leader) trace[field] = phase_clock();
