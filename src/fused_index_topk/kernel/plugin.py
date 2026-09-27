@@ -71,7 +71,7 @@ class FusedIndexTopK:
         plugin_id="fused_index_topk",
         display_name="FusedIndexTopK",
         api_version="1.0",
-        implementation_version="2.3.0-rc1",
+        implementation_version="2.3.0",
         mode="fused",
         description=(
             "Same-kernel DeepGEMM-style score production and exact Top-K with "
@@ -79,7 +79,7 @@ class FusedIndexTopK:
         ),
         implementation="project-local-deepgemm-derivative+custom-cuda-radix",
         exact_topk=True,
-        source_revision="fused-index-topk-v2.3-q1-rc1",
+        source_revision="fused-index-topk-v2.3-q1",
         tags=(
             "prefill",
             "sm90",

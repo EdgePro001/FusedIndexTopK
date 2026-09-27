@@ -34,6 +34,20 @@ def test_public_registry_exposes_one_fused_operator() -> None:
     assert plugin.descriptor.exact_topk is True
 
 
+def test_frozen_q1_release_identity_and_scope() -> None:
+    import fused_index_topk
+
+    plugin = create_variant()
+    assert fused_index_topk.__version__ == "0.3.0"
+    assert plugin.descriptor.implementation_version == "2.3.0"
+    assert plugin.descriptor.source_revision == "fused-index-topk-v2.3-q1"
+    assert plugin.block_q == 1
+    assert plugin.sample_guard_sigmas == 2.0
+    for option in ("conditional_repair", "sample_elements_override"):
+        with pytest.raises(ValueError, match="unknown"):
+            create_variant({option: True})
+
+
 def test_final_operator_supports_qualified_contexts_with_one_kernel() -> None:
     plugin = create_variant()
     assert plugin.block_q == 1

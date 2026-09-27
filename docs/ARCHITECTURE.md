@@ -23,6 +23,13 @@ changes only the amount of fast-path work: it never changes the exact result.
 
 ## Main kernel
 
+The default CTA iteration processes one query (`B_Q=1`); `block_q=2` remains
+available as an explicit ablation. The corresponding WGMMA N tile changes
+from 128 to 64. TMA uses the matching query and weight tile. The warp roles,
+228,160-byte shared-memory allocation, candidate capacity, and sampling/repair
+algorithms are unchanged. The complete operator still requires even input Q
+because its exact repair producer retains a two-row launch contract.
+
 Math warp groups produce score tiles with the pinned DeepGEMM-compatible SM90
 pipeline. A CTA-local consumer performs four-byte radix selection on ordered
 FP32 score bits and writes the final `K = 2048` indices directly.

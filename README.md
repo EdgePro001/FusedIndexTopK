@@ -5,12 +5,22 @@ indexer workload on NVIDIA Hopper GPUs. It keeps score production and the
 normal Top-K path in one kernel, so a dense `Q × N` score matrix is never
 materialized.
 
+The current package release is **v0.3.0** (kernel implementation **2.3.0**).
+It defaults to one query per CTA iteration (`B_Q=1`). See the
+[release scope and qualification](docs/RELEASE_Q1.md).
+
 The current release targets:
 
 - FP8 MQA indexer inputs compatible with the pinned DeepGEMM revision
-- `Q = 4096`, `K = 2048`, and `8192 <= N <= 163840`
+- single-request inputs, positive even `Q <= N`, `K = 2048`, and
+  `8192 <= N <= 163840` with `N` divisible by 128
 - SM90/H20
 - exact Top-K membership, including ties at the selection threshold
+
+`Q=4096` is the historical full-campaign configuration, not a fixed kernel
+requirement. Q1/Q2 real-buffer replay covers Q=8 through 4096 at the sampled
+points below; independent real Q=8192 and serving qualification remain pending.
+`B_Q=1` does not remove the exact repair path's even-Q requirement.
 
 ## What is fused
 
@@ -31,15 +41,16 @@ described in [Architecture](docs/ARCHITECTURE.md) and
 
 Each persistent CTA assigns one warp to TMA, eight warps to tensor-core math,
 and three warps to exact Top-K. Double-buffered candidate slots and ready/free
-barriers let math produce query pair `i` while Top-K consumes pair `i - 1`;
+barriers let math produce query `i` while Top-K consumes query `i - 1`;
 TMA continues feeding the math pipeline independently.
 
 ![Measured TMA, math, and Top-K overlap inside the persistent fused kernel](docs/assets/fused-pipeline-overlap-fixed.svg)
 
-This figure is drawn to scale from an H20 v2.1 run at `Q=4096`, `N=16384`, and
+This historical Q2 figure is drawn to scale from an H20 v2.1 run at `Q=4096`, `N=16384`, and
 `K=2048` using held-out real-corpus replay. The v2.2 kernel keeps the same
 TMA/math/Top-K pipeline while replacing the separate 16K candidate layout with
-the unified layout described below. The upper panel shows five measured
+the unified layout described below. It is not a fresh Q1 timeline or a Q1
+overlap-percentage claim. The upper panel shows five measured
 steady-state iterations from one persistent CTA; unequal block widths are the
 observed `clock64` intervals. Across the complete steady-state trace, **92.6%**
 of Top-K time overlaps TMA scheduling and/or tensor-core math. Median phase
@@ -70,6 +81,30 @@ qualification are available in
 | Exceptional rows | handled by Top-K kernel | handled by Top-K kernel | device-masked exact repair |
 
 ## H20 results
+
+### Q1 release: paired real-buffer replay
+
+The released Q1 kernel changes CTA query granularity and the corresponding
+MMA/TMA tile. Sampling, candidate capacity, spill, and exact repair are unchanged.
+Speedup is Q2 complete-path latency divided by Q1 complete-path latency.
+
+| Input Q | Replay points | Q2 / Q1 geometric mean |
+|---:|---:|---:|
+| 8 | 60 | 1.770x |
+| 64 | 60 | 1.769x |
+| 512 | 60 | 1.152x |
+| 1024 | 60 | 1.024x |
+| 2048 | 60 | 1.035x |
+| 4096 | 120 | 1.021x |
+
+All 420 paired points returned equal final index sets and equal fast-path
+failure counts. These H20 CUDA Event measurements include sampling and repair;
+they are **not whole-model or serving results**. Shorter Q uses contiguous
+suffixes of frozen Q4096 captures. The overall geometric mean is 1.218x over
+this particular grid, not a prediction for a production request distribution.
+Protocol, limitations, and the frozen release settings are in
+[the Q1 release notes](docs/RELEASE_Q1.md). Older figures and campaigns below
+retain their original version labels and must not be read as new Q1 results.
 
 ### v2.2 unified-kernel integration gate
 

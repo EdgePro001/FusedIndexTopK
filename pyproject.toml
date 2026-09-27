@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "fused-index-topk"
-version = "0.2.0"
+version = "0.3.0"
 description = "DeepGEMM-style fused Indexer and exact Top-K kernels for DeepSeek V3.2 sparse attention"
 readme = "README.md"
 license = "MIT"
